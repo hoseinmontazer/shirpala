@@ -1,60 +1,63 @@
 +++
 title = "Projects"
 date = 2025-07-20
-description = "Open-source tools by Hosein Montazer – minimal, practical, and built for DevOps workflows"
-tags = ["Projects", "Open Source", "DevOps", "Go"]
+description = "A collection of open-source tools and projects developed by Hosein Montazer"
+tags = ["Projects", "Open Source", "DevOps", "Go", "Networking"]
 author = "Hosein Montazer"
 +++
 
-Here are a few open-source tools I've created and published on GitHub. These projects are focused on solving real-world infrastructure and productivity problems with simple, composable solutions.
+Here you can find some of the open-source tools and projects I have developed — designed to solve practical problems in infrastructure, networking, and DevOps. These tools are lightweight, simple, and automation-friendly.
 
 ---
 
 ## 📦 [`ipam`](https://github.com/hoseinmontazer/ipam)
 
-A lightweight CLI tool for managing IP address ranges.  
-Designed for DevOps engineers working in Kubernetes, bare-metal, or hybrid infrastructures.
+A lightweight tool for managing IP address ranges, suitable for **Kubernetes**, **bare-metal**, and network automation environments.
 
-**Key features:**
+**Features:**
+- Define CIDR ranges like `192.168.10.0/24`
+- Get the first available IP address
+- Mark IPs as reserved, used, or free
+- JSON file storage without any database
+- Usable in CI/CD pipelines, scripts, or tools like Ansible
 
-- Define and manage IP pools using CIDR (e.g. `192.168.10.0/24`)
-- Get the first free IP address
-- Mark IPs as `used`, `reserved`, or `free`
-- JSON-based storage (no external DB)
-- Scriptable via shell, Ansible, or CI/CD pipelines
-
-**Use cases:**
-
-- IP allocation in provisioning pipelines
-- Bare-metal automation without heavy IPAM systems like NetBox
-- Integrates cleanly into existing infrastructure scripts
+📌 **Ideal for:** DevOps, SRE teams, and small to medium datacenters
 
 ---
 
 ## 🗒️ [`stickynotes`](https://github.com/hoseinmontazer/stickynotes)
 
-A minimal sticky-notes web app written in Go with zero dependencies.  
-Ideal for personal productivity or sharing quick notes across a local network.
+A simple sticky notes web app written in Go — no external dependencies, no database, and zero complex setup.
 
 **Features:**
+- Single-binary executable
+- Simple browser-based UI
+- Markdown support for notes
+- File-based storage on disk
+- Perfect for personal or small team use
 
-- Single-binary web app (no database, no JS frameworks)
-- Markdown support
-- Edit notes directly from the browser
-- Stores data in local files
-- Extremely lightweight – perfect for local or self-hosted use
-
-**Demo use cases:**
-
-- Personal "note-to-self" board
-- Internal dashboard for teams or homelab notes
-- Embedded note widget in developer environments
+📌 **Ideal for:** Developers, internal teams, and technical users
 
 ---
 
-## 🔗 Want More?
+## 🐳 [`docker_registry_proxy`](https://github.com/hoseinmontazer/docker_registry_proxy)
 
-You can find all my open-source projects on GitHub:  
+A lightweight transparent proxy for Docker Registry designed to bypass network restrictions, censorship, or sanctions.
+
+**Features:**
+- Transparent proxy for Docker clients (`/v2/` API)
+- Support for Docker Hub token authentication
+- Logging and CORS support
+- Simple configuration with environment variables
+- Deployable on local machines, servers, or Kubernetes clusters
+
+📌 **Ideal for:** DevOps teams in restricted regions or those needing internal registry caching
+
+---
+
+## 🔗 More Projects?
+
+Explore all my projects and source code here:  
 👉 [github.com/hoseinmontazer](https://github.com/hoseinmontazer)
 
-I'm always looking to improve these tools — contributions, ideas, and bug reports are welcome!
+If you’re interested in contributing or have suggestions, feel free to open issues or submit pull requests on GitHub.
