@@ -1,0 +1,4 @@
+{{ if eq .Language.Lang "fa" }}
+  {{ $vazir := resources.Get "css/vazirmatn.css" | minify }}
+  <link rel="stylesheet" href="{{ $vazir.Permalink }}">
+{{ end }}

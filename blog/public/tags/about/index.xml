@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>About on Hosein Montazer</title>
+    <link>https://shirpala.ir/tags/about/</link>
+    <description>Recent content in About on Hosein Montazer</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 18 Jul 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://shirpala.ir/tags/about/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>About Me</title>
+      <link>https://shirpala.ir/about/</link>
+      <pubDate>Fri, 18 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://shirpala.ir/about/</guid>
+      <description>&lt;p&gt;Hi, I’m &lt;strong&gt;Hosein Montazer&lt;/strong&gt; — a DevOps engineer with over 7 years of hands-on experience building automation pipelines, scaling infrastructure, and making systems more reliable and observable.&lt;/p&gt;&#xA;&lt;p&gt;I’m passionate about designing efficient CI/CD workflows, writing clean and reusable Ansible roles, optimizing Docker-based deployments, and pushing for operational excellence through monitoring stacks like &lt;strong&gt;Prometheus&lt;/strong&gt;, &lt;strong&gt;ELK&lt;/strong&gt;, and &lt;strong&gt;Grafana&lt;/strong&gt;.&lt;/p&gt;&#xA;&lt;p&gt;Currently, I’m diving deeper into &lt;strong&gt;Kubernetes&lt;/strong&gt;, &lt;strong&gt;GitOps (ArgoCD)&lt;/strong&gt;, and &lt;strong&gt;Go development&lt;/strong&gt;. I enjoy working with teams that value fast iteration, clean architecture, and clear communication — preferably remote and globally distributed.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,45 @@
+/* Vazirmatn Font Faces */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/vazirmatn/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/vazirmatn/fonts/webfonts/Vazirmatn-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Base Persian text */
+[lang="fa"] {
+  font-family: Vazirmatn, Tahoma, sans-serif;
+  direction: rtl;
+}
+
+/* Font Awesome protection - Enhanced specificity */
+[lang="fa"] i.fab,
+[lang="fa"] i.fas,
+[lang="fa"] i.far,
+[lang="fa"] i.fa,
+[lang="fa"] svg.svg-inline--fa {
+  font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+  font-style: normal !important;
+  direction: ltr !important;
+}
+
+/* Menu and headers reset */
+[lang="fa"] .menu,
+[lang="fa"] .menu *,
+[lang="fa"] .navigation,
+[lang="fa"] .navigation *,
+[lang="fa"] h1,
+[lang="fa"] h2,
+[lang="fa"] h3,
+[lang="fa"] h4,
+[lang="fa"] h5,
+[lang="fa"] h6 {
+  font-family: var(--primary-font), sans-serif;
+}
+

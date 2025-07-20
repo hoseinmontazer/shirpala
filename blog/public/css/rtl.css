@@ -1,0 +1,13 @@
+:lang(fa) {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Vazirmatn', Tahoma, sans-serif;
+  line-height: 1.8;
+}
+
+/* Fix code blocks */
+:lang(fa) pre, :lang(fa) code {
+  direction: ltr;
+  text-align: left;
+  font-family: monospace;
+}

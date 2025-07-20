@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>پروفایل on Hosein Montazer</title>
+    <link>https://shirpala.ir/fa/tags/%D9%BE%D8%B1%D9%88%D9%81%D8%A7%DB%8C%D9%84/</link>
+    <description>Recent content in پروفایل on Hosein Montazer</description>
+    <generator>Hugo</generator>
+    <language>fa</language>
+    <lastBuildDate>Fri, 18 Jul 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://shirpala.ir/fa/tags/%D9%BE%D8%B1%D9%88%D9%81%D8%A7%DB%8C%D9%84/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>درباره من</title>
+      <link>https://shirpala.ir/fa/about/</link>
+      <pubDate>Fri, 18 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://shirpala.ir/fa/about/</guid>
+      <description>&lt;p&gt;سلام! من &lt;strong&gt;حسین منتظر&lt;/strong&gt; هستم. مهندس DevOps که عاشق ساختن زیرساخت‌های پایدار، خودکار و سریعم. توی این مسیر، یاد گرفتم که کار با تیم‌های توزیع‌شده و شفاف، چقدر می‌تونه تجربه‌ی کاری رو لذت‌بخش‌تر کنه.&lt;/p&gt;&#xA;&lt;p&gt;از ابزارهایی مثل Ansible، Docker، Prometheus و GitLab CI خیلی استفاده می‌کنم و همیشه دنبال راه‌هایی هستم که کارها رو ساده‌تر و بهتر کنم.&lt;/p&gt;&#xA;&lt;p&gt;این روزها بیشتر وقت‌مو می‌ذارم روی Kubernetes، GitOps با ArgoCD و برنامه‌نویسی به خصوص با Go.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

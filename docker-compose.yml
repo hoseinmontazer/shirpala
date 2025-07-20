@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  hugo:
+    image: hugo
+    container_name: hugo-builder
+    volumes:
+      - ./blog:/site
+      - ./blog/public/:/public
+    working_dir: /site
+    command: hugo --baseURL=https://shirpala.ir
+
+  web:
+    image: nginx:alpine
+    container_name: hugo-web
+    depends_on:
+      - hugo
+    ports:
+      - "1313:80"
+    volumes:
+      - ./blog/public/:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
