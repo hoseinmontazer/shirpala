@@ -3,12 +3,19 @@ import re
 import urllib.request
 import urllib.error
 from typing import Dict, Any, Optional
-from .config import GEMINI_API_KEY, GEMINI_MODEL
+from .config import (
+    LLM_PROVIDER,
+    NEXUSLLM_BASE_URL,
+    NEXUSLLM_API_KEY,
+    NEXUSLLM_MODEL,
+    GEMINI_API_KEY,
+    GEMINI_MODEL
+)
 from .db import record_translation
 
 PROMPT_TEMPLATE = """You are a senior DevOps / Systems Engineer and chief editor for "شیرپلا" (Shirpala), a premier Persian technical blog focusing on Linux, Cloud, Kubernetes, Systems Architecture, and DevOps.
 
-Your task is to take this technical news/article and synthesize it into a high-quality, professional technical article written in fluent Persian.
+Your task is to take this technical news/article and synthesize it into a comprehensive, high-quality technical article written in fluent Persian.
 
 Source Information:
 - Source: {source_name}
@@ -24,24 +31,130 @@ Guidelines for Writing:
    - Core technical breakdown / architectural changes with subheadings (`##`).
    - Impact, practical considerations, or takeaways for developers / SREs.
    - Final conclusion and reference link back to the source.
-4. Formatting:
-   - Output clean GitHub-flavored markdown.
-   - Code blocks with appropriate syntax highlighting language (e.g., ```yaml, ```bash, ```go).
-   - DO NOT wrap the markdown in raw HTML tags like `<div dir="rtl">`. Hugo handles RTL automatically.
+4. Content length: Write a comprehensive, detailed article (at least 350-500 words in Persian). NEVER use placeholders like "..." or leave sections empty.
+5. Formatting: Output clean GitHub-flavored markdown. Code blocks with appropriate syntax highlighting language. DO NOT wrap the markdown in raw HTML tags.
 
 Return ONLY a valid JSON object matching this exact structure:
 {{
-  "title": "Persian technical title",
-  "description": "1-2 sentence meta description in Persian",
-  "slug": "kebab-case-english-slug-describing-topic",
-  "categories": ["Primary Category in Persian or English"],
-  "tags": ["Tag1", "Tag2", "Tag3"],
-  "content_markdown": "Full article body in markdown"
+  "title": "عنوان جذاب و دقیق به زبان فارسی",
+  "description": "خلاصه دو جمله‌ای فنی و دقیق برای پیش‌نمایش و متادیتا",
+  "slug": "english-kebab-case-slug",
+  "categories": ["دسته‌بندی اصلی مانند لینوکس یا دواپس"],
+  "tags": ["تگ ۱", "تگ ۲", "Tag3"],
+  "content_markdown": "متن کامل، مشروح و غنی مقاله به زبان فارسی شامل مقدمه، تیترهای ##، تحلیل فنی، و نتیجه‌گیری"
 }}
 """
 
+def extract_json_object(raw_text: str) -> Optional[Dict[str, Any]]:
+    """Robust JSON extraction from LLM response."""
+    if not raw_text:
+        return None
+
+    cleaned = raw_text.strip()
+    # Strip markdown fences if present
+    if "```" in cleaned:
+        cleaned = re.sub(r'^```(?:json)?\s*', '', cleaned)
+        cleaned = re.sub(r'```$', '', cleaned).strip()
+
+    # Try direct parse
+    try:
+        return json.loads(cleaned)
+    except Exception:
+        pass
+
+    # Find outermost or best JSON block
+    start = raw_text.find('{')
+    end = raw_text.rfind('}')
+    if start != -1 and end != -1 and end > start:
+        candidate = raw_text[start:end + 1]
+        try:
+            return json.loads(candidate)
+        except Exception:
+            pass
+
+    return None
+
+def call_nexusllm_api(prompt: str) -> Optional[str]:
+    """Call DariaSystem NexusLLM chat completions endpoint (OpenAI compatible)."""
+    if not NEXUSLLM_API_KEY:
+        return None
+
+    endpoint = f"{NEXUSLLM_BASE_URL}/chat/completions"
+    payload = {
+        "model": NEXUSLLM_MODEL,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are a professional Persian technical writer for Shirpala blog. "
+                    "Output ONLY a valid JSON object with keys: title, description, slug, categories, tags, content_markdown."
+                )
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        "max_tokens": 3500,
+        "temperature": 0.3,
+        "enable_thinking": False
+    }
+
+    req = urllib.request.Request(
+        endpoint,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {NEXUSLLM_API_KEY}",
+            "Content-Type": "application/json"
+        }
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=90) as resp:
+            res_data = json.loads(resp.read().decode("utf-8"))
+            return res_data["choices"][0]["message"]["content"]
+    except Exception as e:
+        print(f"[Translator] NexusLLM call failed: {e}")
+        return None
+
+def call_gemini_api(prompt: str) -> Optional[str]:
+    """Call Gemini API using google-genai SDK or direct REST API."""
+    if not GEMINI_API_KEY:
+        return None
+
+    try:
+        from google import genai
+        from google.genai import types
+        client = genai.Client(api_key=GEMINI_API_KEY)
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(response_mime_type="application/json")
+        )
+        return response.text
+    except ImportError:
+        pass
+    except Exception as e:
+        print(f"[Translator] google-genai SDK call error: {e}, attempting HTTP fallback...")
+
+    # Fallback to direct REST API
+    endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"responseMimeType": "application/json"}
+    }
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(endpoint, data=data, headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=45) as resp:
+            res_json = json.loads(resp.read().decode("utf-8"))
+            return res_json["candidates"][0]["content"]["parts"][0]["text"]
+    except Exception as e:
+        print(f"[Translator] Gemini REST API call failed: {e}")
+        return None
+
 def generate_mock_translation(article: Dict[str, Any]) -> Dict[str, Any]:
-    """Fallback generator when GEMINI_API_KEY is not provided (for local testing)."""
+    """Fallback generator when no LLM API is available."""
     title = article.get("title", "بررسی تحولات جدید در زیرساخت‌های مدرن")
     slug = re.sub(r'[^a-zA-Z0-9]+', '-', article.get("title", "tech-post")).strip('-').lower()[:40] or "tech-update"
     
@@ -76,52 +189,8 @@ def generate_mock_translation(article: Dict[str, Any]) -> Dict[str, Any]:
         "content_markdown": body
     }
 
-def call_gemini_api(prompt: str) -> Optional[str]:
-    """Call Gemini API using google-genai SDK or direct REST API."""
-    if not GEMINI_API_KEY:
-        return None
-
-    # Try official google-genai SDK first
-    try:
-        from google import genai
-        from google.genai import types
-        client = genai.Client(api_key=GEMINI_API_KEY)
-        
-        # Call gemini-3.8-flash model
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json"
-            )
-        )
-        return response.text
-    except ImportError:
-        pass
-    except Exception as e:
-        print(f"[Translator] google-genai SDK call error: {e}, attempting HTTP fallback...")
-
-    # Fallback to direct REST API
-    endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
-    payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {
-            "responseMimeType": "application/json"
-        }
-    }
-    data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(endpoint, data=data, headers={"Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=45) as resp:
-            res_json = json.loads(resp.read().decode("utf-8"))
-            text = res_json["candidates"][0]["content"]["parts"][0]["text"]
-            return text
-    except Exception as e:
-        print(f"[Translator] Gemini REST API call failed: {e}")
-        return None
-
 def translate_article(article: Dict[str, Any]) -> Dict[str, Any]:
-    """Translate and adapt an article to Persian."""
+    """Translate and adapt an article to Persian using configured LLM provider."""
     prompt = PROMPT_TEMPLATE.format(
         source_name=article.get("source_name", "Technical Source"),
         title=article.get("title", ""),
@@ -130,23 +199,29 @@ def translate_article(article: Dict[str, Any]) -> Dict[str, Any]:
     )
 
     result_json = None
-    if GEMINI_API_KEY:
-        raw_response = call_gemini_api(prompt)
-        if raw_response:
-            try:
-                # Strip potential markdown code fences if model returned them
-                cleaned = re.sub(r'^```json\s*', '', raw_response.strip())
-                cleaned = re.sub(r'```$', '', cleaned.strip())
-                result_json = json.loads(cleaned)
-            except Exception as e:
-                print(f"[Translator] Error parsing Gemini JSON response: {e}")
 
+    # Priority 1: DariaSystem NexusLLM
+    if LLM_PROVIDER == "nexusllm" or (not result_json and NEXUSLLM_API_KEY):
+        print(f"[Translator] Using NexusLLM ({NEXUSLLM_MODEL})...")
+        raw_output = call_nexusllm_api(prompt)
+        if raw_output:
+            result_json = extract_json_object(raw_output)
+
+    # Priority 2: Google Gemini
+    if not result_json and (LLM_PROVIDER == "gemini" or GEMINI_API_KEY):
+        print(f"[Translator] Using Gemini ({GEMINI_MODEL})...")
+        raw_output = call_gemini_api(prompt)
+        if raw_output:
+            result_json = extract_json_object(raw_output)
+
+    # Priority 3: Mock fallback
     if not result_json:
-        if not GEMINI_API_KEY:
-            print("[Translator] GEMINI_API_KEY not found in environment; using local mock adapter.")
-        else:
-            print("[Translator] API generation failed; falling back to local adapter.")
+        print("[Translator] Falling back to local adapter.")
         result_json = generate_mock_translation(article)
+
+    # Attach original source information
+    result_json["source_name"] = article.get("source_name", "")
+    result_json["link"] = article.get("url", "")
 
     # Record in database if article_id exists
     if "article_id" in article:

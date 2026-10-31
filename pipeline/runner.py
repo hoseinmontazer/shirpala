@@ -3,24 +3,26 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from .config import DAILY_MAX_POSTS, SCHEDULE_TIME, AUDIT_MIN_SCORE
+from .config import DAILY_MAX_POSTS, SCHEDULE_TIME, AUDIT_MIN_SCORE, TTS_ENABLED, LLM_PROVIDER
 from .db import init_db, get_stats
 from .fetcher import fetch_new_articles
 from .translator import translate_article
-from .auditor import audit_and_clean_post, normalize_persian_text
+from .auditor import audit_and_clean_post
 from .publisher import publish_post
+from .audio_generator import generate_post_audio
+from .transcriber import transcribe_audio_file
 
-def run_pipeline(limit: int = DAILY_MAX_POSTS):
+def run_pipeline(limit: int = DAILY_MAX_POSTS, enable_tts: bool = TTS_ENABLED):
     """Execute one complete cycle of fetching, translating, auditing, and publishing."""
     print("=" * 60)
     print(f"🚀 Shirpala Pipeline Started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print(f"📋 Configuration: Daily Limit={limit}, Min Audit Score={AUDIT_MIN_SCORE}")
+    print(f"📋 Config: Provider={LLM_PROVIDER}, Daily Limit={limit}, Min Audit Score={AUDIT_MIN_SCORE}, TTS={enable_tts}")
     print("=" * 60)
 
     init_db()
 
     # Step 1: Fetch new candidate articles
-    print("\n[Step 1/4] Fetching new articles from configured sources...")
+    print("\n[Step 1/5] Fetching new articles from configured sources...")
     articles = fetch_new_articles(limit_per_source=2)
     if not articles:
         print("ℹ️ No new unread articles found across sources.")
@@ -39,7 +41,7 @@ def run_pipeline(limit: int = DAILY_MAX_POSTS):
         print(f"Source: {article['source_name']} | URL: {article['url']}")
 
         # Step 2: Translate & Adapt
-        print("[Step 2/4] Translating and adapting into Persian...")
+        print("[Step 2/5] Translating and adapting into Persian...")
         try:
             translation = translate_article(article)
         except Exception as e:
@@ -47,7 +49,7 @@ def run_pipeline(limit: int = DAILY_MAX_POSTS):
             continue
 
         # Step 3: Check & Audit First
-        print("[Step 3/4] Running Quality & Schema Audit...")
+        print("[Step 3/5] Running Quality & Schema Audit...")
         is_approved, score, audited_post, audit_notes = audit_and_clean_post(
             post_data=translation,
             source_url=article["url"],
@@ -57,19 +59,32 @@ def run_pipeline(limit: int = DAILY_MAX_POSTS):
         for note in audit_notes:
             print(f"  • {note}")
 
-        # Step 4: Publish to Hugo
-        print(f"[Step 4/4] Publishing to Hugo (Approved: {is_approved}, Score: {score}/100)...")
+        # Step 4: Text-to-Speech (TTS) Audio Generation
+        audio_url = None
+        if enable_tts and is_approved:
+            print("[Step 4/5] Generating Audio Podcast version via Kokoro TTS...")
+            try:
+                audio_url = generate_post_audio(audited_post)
+            except Exception as e:
+                print(f"⚠️ Audio generation warning: {e}")
+        else:
+            print("[Step 4/5] Audio generation skipped (TTS disabled or post not approved).")
+
+        # Step 5: Publish to Hugo
+        print(f"[Step 5/5] Publishing to Hugo (Approved: {is_approved}, Score: {score}/100)...")
         file_path = publish_post(
             post_data=audited_post,
             is_approved=is_approved,
             audit_score=score,
             audit_notes=audit_notes,
-            article_id=article.get("article_id")
+            article_id=article.get("article_id"),
+            audio_url=audio_url
         )
 
         if is_approved:
             published_count += 1
-            print(f"🎉 Successfully Published: {file_path.name}")
+            audio_tag = f" 🎧 [Audio: {audio_url}]" if audio_url else ""
+            print(f"🎉 Successfully Published: {file_path.name}{audio_tag}")
         else:
             flagged_count += 1
             print(f"⚠️ Flagged as Draft for Manual Review: {file_path.name}")
@@ -87,13 +102,12 @@ def run_scheduled_daemon(schedule_time: str = SCHEDULE_TIME):
     print("Running initial execution on startup...")
     run_pipeline()
 
-    # Simple scheduler loop
     while True:
         now_time = datetime.utcnow().strftime("%H:%M")
         if now_time == schedule_time:
             print(f"\n⏰ Triggering daily scheduled run at {now_time} UTC...")
             run_pipeline()
-            time.sleep(65)  # Avoid duplicate trigger in the same minute
+            time.sleep(65)
         time.sleep(30)
 
 def audit_single_file(file_path_str: str):
@@ -104,13 +118,11 @@ def audit_single_file(file_path_str: str):
         sys.exit(1)
 
     raw_text = path.read_text(encoding="utf-8")
-    # Extract frontmatter and body
     body = raw_text
     title = path.stem
     desc = ""
     tags = []
 
-    # Simple frontmatter extractor for TOML or YAML
     if raw_text.startswith("+++"):
         parts = raw_text.split("+++", 2)
         if len(parts) >= 3:
@@ -163,6 +175,7 @@ def main():
     # Command: run
     run_parser = subparsers.add_parser("run", help="Run the pipeline once")
     run_parser.add_argument("--limit", type=int, default=DAILY_MAX_POSTS, help="Maximum posts to process")
+    run_parser.add_argument("--no-tts", action="store_true", help="Disable audio TTS generation")
 
     # Command: schedule (daemon)
     sched_parser = subparsers.add_parser("schedule", help="Run continuously as a daily daemon")
@@ -172,6 +185,11 @@ def main():
     audit_parser = subparsers.add_parser("audit-file", help="Audit an existing markdown file")
     audit_parser.add_argument("file", type=str, help="Path to markdown file")
 
+    # Command: transcribe
+    trans_parser = subparsers.add_parser("transcribe", help="Transcribe an audio file using Whisper")
+    trans_parser.add_argument("audio_file", type=str, help="Path to audio file")
+    trans_parser.add_argument("--lang", type=str, default=None, help="Language code (e.g. en, fa)")
+
     # Command: stats
     subparsers.add_parser("stats", help="Show pipeline database statistics")
 
@@ -179,11 +197,17 @@ def main():
 
     if args.command == "run" or args.command is None:
         limit = getattr(args, "limit", DAILY_MAX_POSTS)
-        run_pipeline(limit=limit)
+        enable_tts = not getattr(args, "no_tts", False)
+        run_pipeline(limit=limit, enable_tts=enable_tts)
     elif args.command == "schedule":
         run_scheduled_daemon(args.time)
     elif args.command == "audit-file":
         audit_single_file(args.file)
+    elif args.command == "transcribe":
+        text = transcribe_audio_file(Path(args.audio_file), language=args.lang)
+        if text:
+            print("\n📝 Transcription:")
+            print(text)
     elif args.command == "stats":
         show_stats()
 

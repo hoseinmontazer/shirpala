@@ -10,9 +10,10 @@ def format_hugo_post(
     post_data: Dict[str, Any],
     is_approved: bool,
     audit_score: int,
-    pub_date: Optional[str] = None
+    pub_date: Optional[str] = None,
+    audio_url: Optional[str] = None
 ) -> str:
-    """Format markdown content with clean Hugo TOML frontmatter."""
+    """Format markdown content with clean Hugo TOML frontmatter and optional audio player."""
     date_str = pub_date or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     draft_val = "false" if is_approved else "true"
     
@@ -25,6 +26,22 @@ def format_hugo_post(
     tags_formatted = ", ".join(f'"{t.strip()}"' for t in post_data.get("tags", []))
     categories_formatted = ", ".join(f'"{c.strip()}"' for c in post_data.get("categories", []))
 
+    audio_frontmatter = f'audio = "{audio_url}"\n' if audio_url else ""
+
+    audio_player_html = ""
+    if audio_url:
+        audio_player_html = f"""
+<div class="audio-player-wrapper" style="margin: 1.5rem 0; padding: 1rem 1.25rem; border-radius: 8px; background: rgba(125,125,125,0.08); border-right: 4px solid var(--accent-color, #42b983);">
+  <div style="font-weight: 600; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 8px;">
+    <span>🎙️</span> <span>شنیدن نسخه صوتی / خلاصه صوتی این مطلب:</span>
+  </div>
+  <audio controls preload="metadata" style="width: 100%; border-radius: 6px;">
+    <source src="{audio_url}" type="audio/mpeg">
+    مرورگر شما از پخش‌کننده صوتی پشتیبانی نمی‌کند.
+  </audio>
+</div>
+"""
+
     toml_frontmatter = f"""+++
 title = "{title}"
 date = {date_str}
@@ -34,9 +51,9 @@ tags = [{tags_formatted}]
 categories = [{categories_formatted}]
 author = "{author}"
 link = "{link}"
-audit_score = {audit_score}
+{audio_frontmatter}audit_score = {audit_score}
 +++
-
+{audio_player_html}
 {post_data.get("content_markdown", "").strip()}
 """
     return toml_frontmatter
@@ -46,23 +63,23 @@ def publish_post(
     is_approved: bool,
     audit_score: int,
     audit_notes: List[str],
-    article_id: Optional[int] = None
+    article_id: Optional[int] = None,
+    audio_url: Optional[str] = None
 ) -> Path:
     """Write post to Hugo content directory and optionally trigger rebuild."""
     POSTS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     slug = post_data.get("slug", "tech-post")
     
-    # Avoid file collisions
     file_path = POSTS_OUTPUT_DIR / f"{slug}.md"
     if file_path.exists():
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         file_path = POSTS_OUTPUT_DIR / f"{slug}-{timestamp}.md"
 
-    content = format_hugo_post(post_data, is_approved, audit_score)
+    content = format_hugo_post(post_data, is_approved, audit_score, audio_url=audio_url)
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
 
-    print(f"[Publisher] Saved post to {file_path} (draft={not is_approved}, score={audit_score})")
+    print(f"[Publisher] Saved post to {file_path} (draft={not is_approved}, score={audit_score}, audio={bool(audio_url)})")
 
     # Record in database
     if article_id:
