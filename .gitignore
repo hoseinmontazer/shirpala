@@ -1,0 +1,27 @@
+# Hugo build output and caches
+blog/public/
+blog/resources/_gen/
+.hugo_build.lock
+
+# Pipeline database, logs, and environments
+pipeline.db
+pipeline.db-journal
+.env
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
