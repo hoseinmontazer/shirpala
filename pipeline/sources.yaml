@@ -1,0 +1,42 @@
+sources:
+  - name: "Linux Weekly News (LWN)"
+    url: "https://lwn.net/headlines/rss"
+    category: "Linux & Kernel"
+    enabled: true
+    default_tags: ["Linux", "Kernel", "OpenSource"]
+
+  - name: "Kubernetes Official Blog"
+    url: "https://kubernetes.io/feed.xml"
+    category: "DevOps & Cloud"
+    enabled: true
+    default_tags: ["Kubernetes", "CloudNative", "DevOps"]
+
+  - name: "Microsoft DevOps Blog"
+    url: "https://devblogs.microsoft.com/devops/feed/"
+    category: "DevOps & CI/CD"
+    enabled: true
+    default_tags: ["DevOps", "CICD", "Cloud"]
+
+  - name: "CNCF Blog"
+    url: "https://www.cncf.io/feed/"
+    category: "Cloud Native"
+    enabled: true
+    default_tags: ["CloudNative", "Kubernetes", "Architecture"]
+
+  - name: "Docker Blog"
+    url: "https://www.docker.com/blog/feed/"
+    category: "Containers"
+    enabled: true
+    default_tags: ["Docker", "Containers", "DevOps"]
+
+  - name: "Go Dev Blog"
+    url: "https://go.dev/blog/feed.atom"
+    category: "Backend & Systems"
+    enabled: true
+    default_tags: ["Golang", "Backend", "Performance"]
+
+  - name: "Rust Blog"
+    url: "https://blog.rust-lang.org/feed.xml"
+    category: "Systems Programming"
+    enabled: true
+    default_tags: ["Rust", "Systems", "Security"]

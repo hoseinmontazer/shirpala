@@ -1,4 +1,4 @@
-baseURL = "http://www.shirpala.ir"
+baseURL = "https://shirpala.ir"
 title = "Hosein Montazer"
 theme = "hugo-coder"
 languageCode = "en"
@@ -187,7 +187,7 @@ url = "https://medium.com/@hoseinmontazer"
 name = "RSS"
 icon = "fa-solid fa-rss fa-2x"
 weight = 6
-url = "https://myhugosite.com/index.xml"
+url = "https://shirpala.ir/index.xml"
 rel = "alternate"
 type = "application/rss+xml"
 

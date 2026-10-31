@@ -6,6 +6,7 @@ blog/resources/_gen/
 # Pipeline database, logs, and environments
 pipeline.db
 pipeline.db-journal
+pipeline_data/
 .env
 *.log
 

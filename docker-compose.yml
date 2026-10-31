@@ -1,18 +1,21 @@
-version: "3"
-
 services:
+  # Hugo static site compiler running in live watch mode
   hugo:
-    image: hugo
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: hugo-builder
+    restart: unless-stopped
     volumes:
       - ./blog:/site
-      - ./blog/public/:/public
     working_dir: /site
-    command: hugo --baseURL=https://shirpala.ir
+    command: hugo --watch --poll 1s --destination /site/public --baseURL=https://shirpala.ir
 
+  # Nginx high-performance web server serving compiled static assets
   web:
     image: nginx:alpine
     container_name: hugo-web
+    restart: unless-stopped
     depends_on:
       - hugo
     ports:
@@ -21,3 +24,26 @@ services:
       - ./blog/public/:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
 
+  # Daily automated ingestion, translation & audit pipeline
+  pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile.pipeline
+    container_name: shirpala-pipeline
+    restart: unless-stopped
+    depends_on:
+      - hugo
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.8-flash}
+      - SCHEDULE_TIME=${SCHEDULE_TIME:-07:00}
+      - DAILY_MAX_POSTS=${DAILY_MAX_POSTS:-3}
+      - AUDIT_MIN_SCORE=${AUDIT_MIN_SCORE:-75}
+      - POSTS_OUTPUT_DIR=/app/blog/content/fa/posts
+      - DB_PATH=/app/data/pipeline.db
+      - SOURCES_FILE=/app/pipeline/sources.yaml
+      - HUGO_REBUILD_ON_PUBLISH=false
+    volumes:
+      - ./blog/content/fa/posts:/app/blog/content/fa/posts
+      - ./pipeline_data:/app/data
+      - ./pipeline/sources.yaml:/app/pipeline/sources.yaml:ro

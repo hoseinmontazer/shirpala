@@ -21,18 +21,14 @@
   font-family: inherit;
 }
 
-/* Force default font for specific elements */
-[lang="fa"] .menu,
-[lang="fa"] .menu *,
-[lang="fa"] .navigation ,
-[lang="fa"] .navigation *,
-[lang="fa"] h1,
-[lang="fa"] h2,
-[lang="fa"] h3,
-[lang="fa"] h4,
-[lang="fa"] h5,
-[lang="fa"] h6 {
-  font-family: var(--primary-font), sans-serif;
+/* Keep monospace font only for code elements */
+[lang="fa"] code,
+[lang="fa"] pre,
+[lang="fa"] kbd,
+[lang="fa"] samp {
+  font-family: var(--code-font, monospace);
+  direction: ltr;
+  text-align: left;
 }
 
 /* Protect Font Awesome icons */
