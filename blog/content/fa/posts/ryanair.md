@@ -2,8 +2,9 @@
 title: "Ryanair ممکن است کمیسیون بررسی کیسه های اضافی کابین را افزایش دهد"
 date: 2025-07-21
 link: "https://www.rte.ie/news/ireland/2025/0721/1524508-ryanair-baggage/"
-lang: "fa"
 draft: false
+audio:
+  - "/audio/fa/ryanair.mp3"
 ---
 
 <div dir="rtl">

@@ -9,7 +9,7 @@ services:
     volumes:
       - ./blog:/site
     working_dir: /site
-    command: hugo --watch --poll 1s --destination /site/public --baseURL=https://shirpala.ir
+    command: hugo --watch --poll 1s --destination /site/public --baseURL=https://blog.knowly.ir/
 
   # Nginx high-performance web server serving compiled static assets & audio
   web:

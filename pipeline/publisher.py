@@ -26,21 +26,7 @@ def format_hugo_post(
     tags_formatted = ", ".join(f'"{t.strip()}"' for t in post_data.get("tags", []))
     categories_formatted = ", ".join(f'"{c.strip()}"' for c in post_data.get("categories", []))
 
-    audio_frontmatter = f'audio = "{audio_url}"\n' if audio_url else ""
-
-    audio_player_html = ""
-    if audio_url:
-        audio_player_html = f"""
-<div class="audio-player-wrapper" style="margin: 1.5rem 0; padding: 1rem 1.25rem; border-radius: 8px; background: rgba(125,125,125,0.08); border-right: 4px solid var(--accent-color, #42b983);">
-  <div style="font-weight: 600; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 8px;">
-    <span>🎙️</span> <span>شنیدن نسخه صوتی / خلاصه صوتی این مطلب:</span>
-  </div>
-  <audio controls preload="metadata" style="width: 100%; border-radius: 6px;">
-    <source src="{audio_url}" type="audio/mpeg">
-    مرورگر شما از پخش‌کننده صوتی پشتیبانی نمی‌کند.
-  </audio>
-</div>
-"""
+    audio_frontmatter = f'audio = ["{audio_url}"]\n' if audio_url else ""
 
     toml_frontmatter = f"""+++
 title = "{title}"
@@ -53,7 +39,6 @@ author = "{author}"
 link = "{link}"
 {audio_frontmatter}audit_score = {audit_score}
 +++
-{audio_player_html}
 {post_data.get("content_markdown", "").strip()}
 """
     return toml_frontmatter
@@ -103,7 +88,7 @@ def trigger_hugo_build():
     if hugo_bin:
         try:
             print("[Publisher] Triggering local Hugo build...")
-            subprocess.run([hugo_bin, "--baseURL=https://shirpala.ir"], cwd=HUGO_SITE_DIR, check=True, capture_output=True)
+            subprocess.run([hugo_bin, "--baseURL=https://blog.knowly.ir/"], cwd=HUGO_SITE_DIR, check=True, capture_output=True)
             print("[Publisher] Hugo build completed successfully.")
             return
         except Exception as e:
@@ -114,7 +99,7 @@ def trigger_hugo_build():
         try:
             print("[Publisher] Triggering Docker Hugo build...")
             res = subprocess.run(
-                ["docker", "run", "--rm", "-v", f"{HUGO_SITE_DIR}:/site", "hugo", "hugo", "--baseURL=https://shirpala.ir"],
+                ["docker", "run", "--rm", "-v", f"{HUGO_SITE_DIR}:/site", "hugo", "hugo", "--baseURL=https://blog.knowly.ir/"],
                 check=False,
                 capture_output=True
             )

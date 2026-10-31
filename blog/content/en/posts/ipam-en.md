@@ -4,6 +4,8 @@ date = 2025-07-20
 description = "Introducing a simple and efficient tool for managing IPs in Kubernetes and Bare-metal environments"
 tags = ["DevOps", "Networking", "IPAM", "Kubernetes"]
 author = "Hosein Montazer"
+translationKey = "ipam"
+audio = ["/audio/en/ipam-en.mp3"]
 +++
 
 In infrastructure projects — especially within **Kubernetes**, **on-prem networks**, or **bare-metal environments** — proper IP address management is essential. That’s why I developed [`ipam`](https://github.com/hoseinmontazer/ipam), a lightweight and reliable tool for managing IP allocation in modern environments.

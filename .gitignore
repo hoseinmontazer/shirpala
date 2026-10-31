@@ -2,7 +2,7 @@
 blog/public/
 blog/resources/_gen/
 .hugo_build.lock
-blog/static/audio/
+blog/.hugo_build.lock
 
 # Pipeline database, logs, and environments
 pipeline.db

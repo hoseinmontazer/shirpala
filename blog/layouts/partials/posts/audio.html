@@ -1,0 +1,405 @@
+{{ $isFa := eq .Language.Lang "fa" }}
+{{ $audioSrc := "" }}
+{{ if reflect.IsSlice .Params.audio }}
+  {{ $audioSrc = index .Params.audio 0 }}
+{{ else if .Params.audio }}
+  {{ $audioSrc = .Params.audio }}
+{{ else if .Params.audio_file }}
+  {{ $audioSrc = .Params.audio_file }}
+{{ end }}
+
+<div class="post-audio-wrapper{{ if $isFa }} is-rtl{{ end }}" id="post-audio-widget" data-lang="{{ .Language.Lang }}">
+  <div class="post-audio-card">
+    <div class="audio-card-header">
+      <div class="audio-card-title">
+        <span class="audio-icon-pulse"><i class="fa-solid fa-headphones"></i></span>
+        <strong>{{ if $isFa }}نسخه صوتی مقاله{{ else }}Listen to this article{{ end }}</strong>
+      </div>
+      <div class="audio-card-badge">
+        {{ if $audioSrc }}
+          <span class="badge file-badge"><i class="fa-solid fa-circle-play"></i> {{ if $isFa }}صوت استودیویی{{ else }}Studio Audio{{ end }}</span>
+        {{ else }}
+          <span class="badge tts-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> {{ if $isFa }}روخوانی هوشمند{{ else }}AI Voice Reader{{ end }}</span>
+        {{ end }}
+      </div>
+    </div>
+
+    {{ if $audioSrc }}
+    <!-- MP3 Audio File Player -->
+    <div class="audio-player-body">
+      <audio id="audio-file-element" preload="metadata" src="{{ $audioSrc | relURL }}"></audio>
+      <div class="audio-player-controls">
+        <button type="button" class="audio-btn-action" id="audio-play-pause-btn" aria-label="{{ if $isFa }}پخش / مکث{{ else }}Play / Pause{{ end }}">
+          <i class="fa-solid fa-play" id="audio-play-icon"></i>
+        </button>
+
+        <span class="audio-timestamp" id="audio-current-time">0:00</span>
+
+        <div class="audio-scrubber-track" id="audio-scrubber-track">
+          <div class="audio-scrubber-fill" id="audio-scrubber-fill"></div>
+        </div>
+
+        <span class="audio-timestamp" id="audio-total-duration">--:--</span>
+
+        <button type="button" class="audio-btn-speed" id="audio-speed-btn" title="{{ if $isFa }}سرعت پخش{{ else }}Playback Speed{{ end }}">1x</button>
+
+        <a href="{{ $audioSrc | relURL }}" download class="audio-btn-download" title="{{ if $isFa }}دانلود فایل صوتی{{ else }}Download Audio{{ end }}">
+          <i class="fa-solid fa-arrow-down-to-bracket"></i>
+        </a>
+      </div>
+    </div>
+    {{ else }}
+    <!-- Web Speech API Browser Reader -->
+    <div class="audio-player-body tts-body">
+      <div class="audio-player-controls">
+        <button type="button" class="audio-btn-action" id="tts-play-pause-btn" aria-label="{{ if $isFa }}شروع خواندن{{ else }}Read Article{{ end }}">
+          <i class="fa-solid fa-play" id="tts-play-icon"></i>
+        </button>
+
+        <div class="tts-info-track">
+          <span id="tts-status-label" class="tts-status-text">
+            {{ if $isFa }}برای شنیدن متن این مقاله کلیک کنید{{ else }}Click play to listen to this article aloud{{ end }}
+          </span>
+        </div>
+
+        <button type="button" class="audio-btn-speed" id="tts-speed-btn" title="{{ if $isFa }}سرعت خواندن{{ else }}Reading Speed{{ end }}">1x</button>
+
+        <button type="button" class="audio-btn-action audio-btn-stop" id="tts-stop-btn" style="display:none;" title="{{ if $isFa }}توقف کامل{{ else }}Stop{{ end }}">
+          <i class="fa-solid fa-stop"></i>
+        </button>
+      </div>
+    </div>
+    {{ end }}
+  </div>
+</div>
+
+<style>
+.post-audio-wrapper {
+  margin: 1.5rem 0 2.5rem 0;
+  font-family: inherit;
+}
+.post-audio-card {
+  background: rgba(125, 125, 125, 0.07);
+  border: 1px solid rgba(125, 125, 125, 0.2);
+  border-radius: 12px;
+  padding: 1rem 1.4rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+.post-audio-card:hover {
+  border-color: rgba(125, 125, 125, 0.35);
+}
+.audio-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  font-size: 1.45rem;
+}
+.audio-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 600;
+}
+.audio-icon-pulse {
+  color: #0284c7;
+  display: inline-flex;
+  align-items: center;
+}
+.audio-card-badge .badge {
+  font-size: 1.2rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.badge.file-badge {
+  background: rgba(14, 165, 233, 0.15);
+  color: #0284c7;
+}
+.badge.tts-badge {
+  background: rgba(168, 85, 247, 0.15);
+  color: #9333ea;
+}
+.audio-player-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+.audio-btn-action,
+.audio-btn-speed,
+.audio-btn-download {
+  background: #0284c7;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.4rem;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.audio-btn-action:hover,
+.audio-btn-speed:hover,
+.audio-btn-download:hover {
+  background: #0369a1;
+  transform: scale(1.05);
+}
+.audio-btn-speed {
+  border-radius: 8px;
+  width: auto;
+  min-width: 36px;
+  padding: 0 0.6rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  height: 30px;
+}
+.audio-btn-download {
+  border-radius: 8px;
+  width: auto;
+  min-width: 32px;
+  height: 30px;
+  padding: 0 0.5rem;
+  font-size: 1.2rem;
+}
+.audio-btn-stop {
+  background: #ef4444;
+}
+.audio-btn-stop:hover {
+  background: #dc2626;
+}
+.audio-timestamp {
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+  min-width: 38px;
+  text-align: center;
+}
+.audio-scrubber-track {
+  flex-grow: 1;
+  height: 8px;
+  background: rgba(125, 125, 125, 0.25);
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+.audio-scrubber-fill {
+  height: 100%;
+  width: 0%;
+  background: #0284c7;
+  border-radius: 4px;
+  transition: width 0.1s linear;
+}
+.tts-info-track {
+  flex-grow: 1;
+  padding: 0 0.5rem;
+}
+.tts-status-text {
+  font-size: 1.35rem;
+  opacity: 0.85;
+}
+.post-audio-wrapper.is-rtl {
+  direction: rtl;
+  text-align: right;
+}
+.post-audio-wrapper.is-rtl .audio-card-title {
+  flex-direction: row;
+}
+
+/* Dark mode adjustments */
+body.colorscheme-dark .post-audio-card,
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto .post-audio-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  body.colorscheme-auto .badge.file-badge,
+  body.colorscheme-dark .badge.file-badge {
+    background: rgba(56, 189, 248, 0.2);
+    color: #38bdf8;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Mode 1: File Audio Player
+  const audioEl = document.getElementById('audio-file-element');
+  const playBtn = document.getElementById('audio-play-pause-btn');
+  const playIcon = document.getElementById('audio-play-icon');
+  const curTime = document.getElementById('audio-current-time');
+  const durTime = document.getElementById('audio-total-duration');
+  const track = document.getElementById('audio-scrubber-track');
+  const fill = document.getElementById('audio-scrubber-fill');
+  const speedBtn = document.getElementById('audio-speed-btn');
+
+  function fmtTime(sec) {
+    if (isNaN(sec) || !isFinite(sec)) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  if (audioEl && playBtn) {
+    audioEl.addEventListener('loadedmetadata', function() {
+      durTime.textContent = fmtTime(audioEl.duration);
+    });
+
+    audioEl.addEventListener('timeupdate', function() {
+      curTime.textContent = fmtTime(audioEl.currentTime);
+      if (audioEl.duration) {
+        const pct = (audioEl.currentTime / audioEl.duration) * 100;
+        fill.style.width = pct + '%';
+      }
+    });
+
+    audioEl.addEventListener('ended', function() {
+      playIcon.className = 'fa-solid fa-play';
+      fill.style.width = '0%';
+      curTime.textContent = '0:00';
+    });
+
+    playBtn.addEventListener('click', function() {
+      if (audioEl.paused) {
+        audioEl.play();
+        playIcon.className = 'fa-solid fa-pause';
+      } else {
+        audioEl.pause();
+        playIcon.className = 'fa-solid fa-play';
+      }
+    });
+
+    if (track) {
+      track.addEventListener('click', function(e) {
+        if (!audioEl.duration) return;
+        const rect = track.getBoundingClientRect();
+        const isRtl = document.getElementById('post-audio-widget').classList.contains('is-rtl');
+        let clickPos = (e.clientX - rect.left) / rect.width;
+        if (isRtl) {
+          clickPos = 1 - clickPos;
+        }
+        audioEl.currentTime = Math.max(0, Math.min(audioEl.duration, clickPos * audioEl.duration));
+      });
+    }
+
+    if (speedBtn) {
+      const speeds = [1, 1.25, 1.5, 2];
+      let speedIdx = 0;
+      speedBtn.addEventListener('click', function() {
+        speedIdx = (speedIdx + 1) % speeds.length;
+        audioEl.playbackRate = speeds[speedIdx];
+        speedBtn.textContent = speeds[speedIdx] + 'x';
+      });
+    }
+  }
+
+  // Mode 2: Web Speech API Browser TTS Reader
+  const ttsPlayBtn = document.getElementById('tts-play-pause-btn');
+  const ttsPlayIcon = document.getElementById('tts-play-icon');
+  const ttsStopBtn = document.getElementById('tts-stop-btn');
+  const ttsSpeedBtn = document.getElementById('tts-speed-btn');
+  const ttsStatus = document.getElementById('tts-status-label');
+  const widget = document.getElementById('post-audio-widget');
+
+  if (ttsPlayBtn && 'speechSynthesis' in window) {
+    const lang = widget ? widget.getAttribute('data-lang') : 'en';
+    const isFa = lang === 'fa';
+    let isSpeaking = false;
+    let isPaused = false;
+    let ttsRate = 1.0;
+
+    function getArticleText() {
+      const content = document.querySelector('.post-content');
+      if (!content) return '';
+      // Clone and remove pre/code blocks so speech is smooth
+      const clone = content.cloneNode(true);
+      clone.querySelectorAll('pre, code, script, style, .highlight').forEach(el => el.remove());
+      return clone.innerText.replace(/\s+/g, ' ').trim();
+    }
+
+    function stopTTS() {
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      isPaused = false;
+      ttsPlayIcon.className = 'fa-solid fa-play';
+      if (ttsStopBtn) ttsStopBtn.style.display = 'none';
+      if (ttsStatus) {
+        ttsStatus.textContent = isFa ? 'توقف خواندن' : 'Reading stopped';
+      }
+    }
+
+    ttsPlayBtn.addEventListener('click', function() {
+      if (isSpeaking && !isPaused) {
+        window.speechSynthesis.pause();
+        isPaused = true;
+        ttsPlayIcon.className = 'fa-solid fa-play';
+        if (ttsStatus) ttsStatus.textContent = isFa ? 'متوقف شد' : 'Paused';
+        return;
+      }
+
+      if (isSpeaking && isPaused) {
+        window.speechSynthesis.resume();
+        isPaused = false;
+        ttsPlayIcon.className = 'fa-solid fa-pause';
+        if (ttsStatus) ttsStatus.textContent = isFa ? 'درحال خواندن مقاله...' : 'Reading article...';
+        return;
+      }
+
+      const text = getArticleText();
+      if (!text) return;
+
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = isFa ? 'fa-IR' : 'en-US';
+      utter.rate = ttsRate;
+
+      utter.onstart = function() {
+        isSpeaking = true;
+        isPaused = false;
+        ttsPlayIcon.className = 'fa-solid fa-pause';
+        if (ttsStopBtn) ttsStopBtn.style.display = 'inline-flex';
+        if (ttsStatus) ttsStatus.textContent = isFa ? 'درحال خواندن مقاله...' : 'Reading article...';
+      };
+
+      utter.onend = function() {
+        stopTTS();
+        if (ttsStatus) ttsStatus.textContent = isFa ? 'پایان روخوانی' : 'Finished reading';
+      };
+
+      utter.onerror = function() {
+        stopTTS();
+      };
+
+      window.speechSynthesis.speak(utter);
+    });
+
+    if (ttsStopBtn) {
+      ttsStopBtn.addEventListener('click', stopTTS);
+    }
+
+    if (ttsSpeedBtn) {
+      const speeds = [1.0, 1.25, 1.5];
+      let speedIdx = 0;
+      ttsSpeedBtn.addEventListener('click', function() {
+        speedIdx = (speedIdx + 1) % speeds.length;
+        ttsRate = speeds[speedIdx];
+        ttsSpeedBtn.textContent = ttsRate + 'x';
+        if (isSpeaking) {
+          // Restart with new rate
+          stopTTS();
+          ttsPlayBtn.click();
+        }
+      });
+    }
+  }
+})();
+</script>
+

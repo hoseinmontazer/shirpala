@@ -2,8 +2,9 @@
 title: "preview Public Server Azure DevOps Server"
 date: 2025-07-21
 link: "https://devblogs.microsoft.com/devops/azure-devops-mcp-server-public-preview/"
-lang: "fa"
 draft: false
+audio:
+  - "/audio/fa/test.mp3"
 ---
 
 <div dir="rtl">

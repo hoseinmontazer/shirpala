@@ -4,6 +4,7 @@ date = 2025-07-20
 description = "A collection of open-source tools and projects developed by Hosein Montazer"
 tags = ["Projects", "Open Source", "DevOps", "Go", "Networking"]
 author = "Hosein Montazer"
+translationKey = "projects"
 +++
 
 Here you can find some of the open-source tools and projects I have developed — designed to solve practical problems in infrastructure, networking, and DevOps. These tools are lightweight, simple, and automation-friendly.

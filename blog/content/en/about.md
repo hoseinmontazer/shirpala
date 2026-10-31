@@ -4,6 +4,7 @@ date = "2025-07-18"
 description = "Get to know Hosein Montazer — DevOps engineer, automation enthusiast, and builder of reliable infrastructure."
 tags = ["DevOps", "About", "Profile", "SRE"]
 author = "Hosein Montazer"
+translationKey = "about"
 +++
 
 **Shirpala** is a personal technical blog where I share the experiences, lessons, and ideas I’ve gathered while working with Linux, software engineering, distributed systems, and modern DevOps and infrastructure tools.

@@ -1,4 +1,4 @@
-baseURL = "https://shirpala.ir"
+baseURL = "https://blog.knowly.ir/"
 title = "Hosein Montazer"
 theme = "hugo-coder"
 languageCode = "en"
@@ -187,7 +187,7 @@ url = "https://medium.com/@hoseinmontazer"
 name = "RSS"
 icon = "fa-solid fa-rss fa-2x"
 weight = 6
-url = "https://shirpala.ir/index.xml"
+url = "https://blog.knowly.ir/index.xml"
 rel = "alternate"
 type = "application/rss+xml"
 

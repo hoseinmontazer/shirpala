@@ -4,6 +4,8 @@ date = 2025-07-20
 description = "معرفی یک ابزار ساده و مؤثر برای مدیریت IP در محیط‌های Kubernetes و Bare-metal"
 tags = ["DevOps", "Networking", "IPAM", "Kubernetes"]
 author = "Hosein Montazer"
+translationKey = "ipam"
+audio = ["/audio/fa/ipam.mp3"]
 +++
 
 در پروژه‌های زیرساختی، مخصوصاً در محیط‌های **Kubernetes**، **شبکه‌های داخلی دیتاسنتر** یا **سرورهای Bare-metal**، مدیریت درست آدرس‌های IP اهمیت بالایی دارد. به همین دلیل، ابزاری سبک و قابل اعتماد به نام [`ipam`](https://github.com/hoseinmontazer/ipam) را توسعه دادم.

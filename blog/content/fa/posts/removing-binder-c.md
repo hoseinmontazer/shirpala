@@ -8,6 +8,7 @@ categories = ["Linux & Kernel"]
 author = "شیرپلا"
 link = "https://lwn.net/Articles/1102982/"
 audit_score = 100
+audio = ["/audio/fa/removing-binder-c.mp3"]
 +++
 
 در این مقاله به بررسی یکی از آخرین تحولات مطرح شده در دنیای فناوری و زیرساخت می‌پردازیم که اخیراً توسط **Linux Weekly News (LWN)** منتشر شده است.

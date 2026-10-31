@@ -2,8 +2,9 @@
 title: "پایان گواهی امنیت سیستم عامل لینوک و سیستم امنیتی"
 date: 2025-07-21
 link: "https://lwn.net/SubscriberLink/1029767/43b62a7a7408c2a9/"
-lang: "fa"
 draft: false
+audio:
+  - "/audio/fa/rust.mp3"
 ---
 
 <div dir="rtl">

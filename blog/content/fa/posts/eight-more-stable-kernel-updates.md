@@ -7,19 +7,9 @@ tags = ["Linux", "Kernel", "OpenSource"]
 categories = ["Linux & Kernel"]
 author = "شیرپلا"
 link = "https://lwn.net/Articles/1104177/"
-audio = "/audio/posts/eight-more-stable-kernel-updates.mp3"
+audio = ["/audio/fa/eight-more-stable-kernel-updates.mp3"]
 audit_score = 100
 +++
-
-<div class="audio-player-wrapper" style="margin: 1.5rem 0; padding: 1rem 1.25rem; border-radius: 8px; background: rgba(125,125,125,0.08); border-right: 4px solid var(--accent-color, #42b983);">
-  <div style="font-weight: 600; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 8px;">
-    <span>🎙️</span> <span>شنیدن نسخه صوتی / خلاصه صوتی این مطلب:</span>
-  </div>
-  <audio controls preload="metadata" style="width: 100%; border-radius: 6px;">
-    <source src="/audio/posts/eight-more-stable-kernel-updates.mp3" type="audio/mpeg">
-    مرورگر شما از پخش‌کننده صوتی پشتیبانی نمی‌کند.
-  </audio>
-</div>
 
 در این مقاله به بررسی یکی از آخرین تحولات مطرح شده در دنیای فناوری و زیرساخت می‌پردازیم که اخیراً توسط **Linux Weekly News (LWN)** منتشر شده است.
 
