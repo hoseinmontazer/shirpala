@@ -190,6 +190,7 @@
   position: relative;
   cursor: pointer;
   overflow: hidden;
+  direction: ltr !important;
 }
 .audio-scrubber-fill {
   height: 100%;
@@ -281,12 +282,8 @@ body.colorscheme-dark .post-audio-card,
       track.addEventListener('click', function(e) {
         if (!audioEl.duration) return;
         const rect = track.getBoundingClientRect();
-        const isRtl = document.getElementById('post-audio-widget').classList.contains('is-rtl');
-        let clickPos = (e.clientX - rect.left) / rect.width;
-        if (isRtl) {
-          clickPos = 1 - clickPos;
-        }
-        audioEl.currentTime = Math.max(0, Math.min(audioEl.duration, clickPos * audioEl.duration));
+        const clickPos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        audioEl.currentTime = clickPos * audioEl.duration;
       });
     }
 

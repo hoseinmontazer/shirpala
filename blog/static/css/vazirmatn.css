@@ -1,42 +1,239 @@
-/* Vazirmatn Font Faces */
+/* Vazirmatn Web Fonts */
 @font-face {
   font-family: 'Vazirmatn';
   src: url('/fonts/vazirmatn/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');
   font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/vazirmatn/fonts/webfonts/Vazirmatn-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/vazirmatn/fonts/webfonts/Vazirmatn-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Vazirmatn';
   src: url('/fonts/vazirmatn/fonts/webfonts/Vazirmatn-Bold.woff2') format('woff2');
   font-weight: 700;
+  font-style: normal;
   font-display: swap;
 }
 
-/* Apply Vazirmatn to base Persian text */
+/* ========================================================
+   Persian Typography & RTL Global Rules
+   ======================================================== */
+html[lang="fa"],
+body.rtl,
 [lang="fa"] {
-  font-family: Vazirmatn, Tahoma, sans-serif;
+  font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, Tahoma, sans-serif !important;
+  direction: rtl;
+  text-align: right;
+  line-height: 1.85;
+  letter-spacing: -0.01em;
 }
 
-/* Let child elements inherit by default */
-[lang="fa"] * {
-  font-family: inherit;
+/* Ensure ALL headings in Persian use Vazirmatn */
+html[lang="fa"] h1, html[lang="fa"] h2, html[lang="fa"] h3,
+html[lang="fa"] h4, html[lang="fa"] h5, html[lang="fa"] h6,
+body.rtl h1, body.rtl h2, body.rtl h3,
+body.rtl h4, body.rtl h5, body.rtl h6,
+[lang="fa"] h1, [lang="fa"] h2, [lang="fa"] h3,
+[lang="fa"] h4, [lang="fa"] h5, [lang="fa"] h6,
+[lang="fa"] .title,
+[lang="fa"] .post-title,
+[lang="fa"] .navigation-title {
+  font-family: 'Vazirmatn', Tahoma, sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em;
+  line-height: 1.5;
 }
 
-/* Keep monospace font only for code elements */
-[lang="fa"] code,
-[lang="fa"] pre,
-[lang="fa"] kbd,
-[lang="fa"] samp {
-  font-family: var(--code-font, monospace);
+/* Navbar & Menu in Persian */
+html[lang="fa"] .navigation,
+body.rtl .navigation,
+[lang="fa"] .navigation-link,
+[lang="fa"] .menu,
+[lang="fa"] .menu-item {
+  font-family: 'Vazirmatn', Tahoma, sans-serif !important;
+  font-weight: 500;
+}
+
+/* ========================================================
+   Code & Technical Elements Protection
+   Always force LTR and Monospace for code, config, and terms
+   ======================================================== */
+html[lang="fa"] pre,
+html[lang="fa"] code,
+html[lang="fa"] kbd,
+html[lang="fa"] samp,
+html[lang="fa"] .highlight,
+body.rtl pre,
+body.rtl code,
+body.rtl .highlight {
+  direction: ltr !important;
+  text-align: left !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, Monaco, monospace !important;
+  font-size: 0.9em;
+}
+
+/* Inline code tags inside Persian sentences */
+html[lang="fa"] p code,
+html[lang="fa"] li code {
   direction: ltr;
-  text-align: left;
+  display: inline-block;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  background: rgba(125, 125, 125, 0.15);
+  margin: 0 0.2em;
 }
 
-/* Protect Font Awesome icons */
-[lang="fa"] .fa,
-[lang="fa"] .fas,
-[lang="fa"] .far,
-[lang="fa"] .fab {
+/* Protect Font Awesome Icons across RTL */
+.fa, .fas, .far, .fab, .fa-solid, .fa-brands, .fa-regular,
+i[class*="fa-"],
+svg.svg-inline--fa {
   font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
   direction: ltr !important;
+  font-style: normal !important;
+}
+
+/* Lists and Blockquotes in RTL */
+body.rtl ul,
+body.rtl ol {
+  padding-right: 1.5rem;
+  padding-left: 0;
+}
+
+body.rtl blockquote {
+  border-right: 4px solid #0284c7;
+  border-left: none;
+  padding: 0.6rem 1.2rem;
+  margin: 1.5rem 0;
+  background: rgba(2, 132, 199, 0.05);
+  border-radius: 0 8px 8px 0;
+}
+
+/* Post Meta (Date, Reading time, Tags) */
+body.rtl .post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+body.rtl .post-meta i {
+  margin-left: 0.35rem;
+  margin-right: 0;
+}
+
+/* Language switch badge in navbar */
+.navigation-list .navigation-item a[href*="/fa/"],
+.navigation-list .navigation-item a[href*="/en/"] {
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  background: rgba(125, 125, 125, 0.12);
+  transition: all 0.2s ease;
+}
+.navigation-list .navigation-item a[href*="/fa/"]:hover,
+.navigation-list .navigation-item a[href*="/en/"]:hover {
+  background: #0284c7;
+  color: #ffffff !important;
+}
+
+/* Bilingual Post Switcher Banner */
+.post-translation-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.6rem 1.2rem;
+  margin: 1.2rem 0;
+  border-radius: 8px;
+  background: rgba(2, 132, 199, 0.08);
+  border: 1px solid rgba(2, 132, 199, 0.25);
+  font-size: 1.35rem;
+}
+.post-translation-banner i {
+  color: #0284c7;
+  font-size: 1.6rem;
+}
+.post-translation-banner .notice-text {
+  font-weight: 500;
+  opacity: 0.85;
+}
+.post-translation-banner .translation-link {
+  font-weight: 700;
+  color: #0284c7;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.post-translation-banner .translation-link:hover {
+  color: #0369a1;
+}
+body.colorscheme-dark .post-translation-banner,
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto .post-translation-banner {
+    background: rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.25);
+  }
+  body.colorscheme-auto .post-translation-banner .translation-link,
+  body.colorscheme-dark .post-translation-banner .translation-link {
+    color: #38bdf8;
+  }
+}
+
+/* Post list audio badge */
+.post-audio-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline-start: 0.6rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 1.15rem;
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284c7;
+  border-radius: 6px;
+  vertical-align: middle;
+  transition: all 0.2s ease;
+}
+.post-audio-badge:hover {
+  background: #0284c7;
+  color: #ffffff;
+}
+body.colorscheme-dark .post-audio-badge,
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto .post-audio-badge {
+    background: rgba(56, 189, 248, 0.18);
+    color: #38bdf8;
+  }
+  body.colorscheme-auto .post-audio-badge:hover,
+  body.colorscheme-dark .post-audio-badge:hover {
+    background: #38bdf8;
+    color: #0f172a;
+  }
+}
+
+/* RTL Paragraph alignment & List title font fixes */
+body.rtl .content article p,
+html[lang="fa"] .content article p {
+  text-align: right !important;
+}
+
+body.rtl .list ul li .title,
+html[lang="fa"] .list ul li .title {
+  font-family: 'Vazirmatn', Tahoma, sans-serif !important;
+  font-weight: 700 !important;
+}
+
+body.rtl .list ul li .date {
+  font-variant-numeric: tabular-nums;
 }

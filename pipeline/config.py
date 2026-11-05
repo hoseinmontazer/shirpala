@@ -44,7 +44,9 @@ WHISPER_MODEL = os.getenv("WHISPER_MODEL", "whisper-large-v3")
 # Pipeline Configuration
 SOURCES_FILE = Path(os.getenv("SOURCES_FILE", str(PIPELINE_DIR / "sources.yaml")))
 DB_PATH = Path(os.getenv("DB_PATH", str(BASE_DIR / "pipeline.db")))
-POSTS_OUTPUT_DIR = Path(os.getenv("POSTS_OUTPUT_DIR", str(BASE_DIR / "blog" / "content" / "fa" / "posts")))
+POSTS_FA_DIR = Path(os.getenv("POSTS_FA_DIR", str(BASE_DIR / "blog" / "content" / "fa" / "posts")))
+POSTS_EN_DIR = Path(os.getenv("POSTS_EN_DIR", str(BASE_DIR / "blog" / "content" / "en" / "posts")))
+POSTS_OUTPUT_DIR = POSTS_FA_DIR
 DAILY_MAX_POSTS = int(os.getenv("DAILY_MAX_POSTS", "3"))
 AUDIT_MIN_SCORE = int(os.getenv("AUDIT_MIN_SCORE", "75"))
 SCHEDULE_TIME = os.getenv("SCHEDULE_TIME", "07:00")  # HH:MM UTC

@@ -5,9 +5,10 @@ draft = false
 description = "تحلیل عمیق فنی از تغییرات بنیادین مدیریت منابع در لینوکس با cgroup v2، بررسی مکانیزم‌های OOM و Memory QoS، و راهنمای کامل مهاجرت برای مهندسان SRE پیش از نسخه 1.35 کوبرنتیز."
 tags = ["Kubernetes", "cgroup v2", "SRE", "Linux Kernel", "Resource Management"]
 categories = ["کوبرنتیز و ابری", "لینوکس و سیستم‌عامل"]
-author = "شیرپلا"
+author = "حسین منتظر"
 link = "https://kubernetes.io/blog/2026/10/06/kubernetes-cgroups-v2-shift/"
-audio = ["/audio/posts/kubernetes-cgroup-v2-migration-sre-guide.mp3"]
+translationKey = "kubernetes-cgroup-v2-migration-sre-guide"
+audio = ["/audio/posts/kubernetes-cgroup-v2-migration-sre-guide-fa.mp3"]
 audit_score = 100
 +++
 ## چالش‌های معماری cgroup v1 و ضرورت گذار

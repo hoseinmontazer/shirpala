@@ -49,13 +49,15 @@ services:
       - SCHEDULE_TIME=${SCHEDULE_TIME:-07:00}
       - DAILY_MAX_POSTS=${DAILY_MAX_POSTS:-3}
       - AUDIT_MIN_SCORE=${AUDIT_MIN_SCORE:-75}
+      - POSTS_FA_DIR=/app/blog/content/fa/posts
+      - POSTS_EN_DIR=/app/blog/content/en/posts
       - POSTS_OUTPUT_DIR=/app/blog/content/fa/posts
       - AUDIO_OUTPUT_DIR=/app/blog/static/audio/posts
       - DB_PATH=/app/data/pipeline.db
       - SOURCES_FILE=/app/pipeline/sources.yaml
       - HUGO_REBUILD_ON_PUBLISH=false
     volumes:
-      - ./blog/content/fa/posts:/app/blog/content/fa/posts
+      - ./blog/content:/app/blog/content
       - ./blog/static/audio:/app/blog/static/audio
       - ./pipeline_data:/app/data
       - ./pipeline/sources.yaml:/app/pipeline/sources.yaml:ro

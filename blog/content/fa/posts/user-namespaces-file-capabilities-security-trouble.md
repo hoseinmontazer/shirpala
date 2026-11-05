@@ -5,9 +5,10 @@ draft = false
 description = "تحلیل فنی آسیب‌پذیری‌های ناشی از تعامل User Namespaces و File Capabilities در هسته لینوکس و بررسی پچ‌های جدید برای جلوگیری از ارتقای غیرمجاز دسترسی."
 tags = ["Linux Kernel", "User Namespaces", "Security", "Containers", "File Capabilities"]
 categories = ["لینوکس", "امنیت سیستمی"]
-author = "شیرپلا"
+author = "حسین منتظر"
 link = "https://lwn.net/Articles/1103429/"
-audio = ["/audio/posts/user-namespaces-file-capabilities-security-trouble.mp3"]
+translationKey = "user-namespaces-file-capabilities-security-trouble"
+audio = ["/audio/posts/user-namespaces-file-capabilities-security-trouble-fa.mp3"]
 audit_score = 100
 +++
 ## مقدمه: مرزهای امنیتی در معماری کانتینر

@@ -193,7 +193,10 @@ type = "application/rss+xml"
 
 [languages]
 [languages.en]
-languageName = ":uk:"
+languageName = "English"
+languageCode = "en"
+title = "Hosein Montazer"
+weight = 1
 contentDir = "content/en"
 
 [[languages.en.menu.main]]
@@ -218,9 +221,9 @@ url = "contact/"
 
 
 [languages.fa]
-languageName = "فارسی"  # Fixed
+languageName = "فارسی"
 languageCode = "fa"
-title = "Hosein Montazer"
+title = "حسین منتظر"
 weight = 2
 contentDir = "content/fa"
 

@@ -41,7 +41,7 @@ def run_pipeline(limit: int = DAILY_MAX_POSTS, enable_tts: bool = TTS_ENABLED):
         print(f"Source: {article['source_name']} | URL: {article['url']}")
 
         # Step 2: Translate & Adapt
-        print("[Step 2/5] Translating and adapting into Persian...")
+        print("[Step 2/5] Translating and adapting into Persian & English...")
         try:
             translation = translate_article(article)
         except Exception as e:
@@ -60,34 +60,58 @@ def run_pipeline(limit: int = DAILY_MAX_POSTS, enable_tts: bool = TTS_ENABLED):
             print(f"  • {note}")
 
         # Step 4: Text-to-Speech (TTS) Audio Generation
-        audio_url = None
+        audio_urls = {}
         if enable_tts and is_approved:
-            print("[Step 4/5] Generating Audio Podcast version via Piper TTS...")
-            try:
-                audio_url = generate_post_audio(audited_post)
-            except Exception as e:
-                print(f"⚠️ Audio generation warning: {e}")
+            print("[Step 4/5] Generating Audio Podcast versions (Nexus Piper FA + EN)...")
+            slug = audited_post.get("slug", "post")
+
+            if "fa" in audited_post:
+                fa_input = dict(audited_post["fa"])
+                fa_input["slug"] = slug
+                fa_input["source_name"] = audited_post.get("source_name", "")
+                try:
+                    audio_urls["fa"] = generate_post_audio(fa_input, lang="fa")
+                except Exception as e:
+                    print(f"⚠️ FA Audio generation warning: {e}")
+
+            if "en" in audited_post:
+                en_input = dict(audited_post["en"])
+                en_input["slug"] = slug
+                en_input["source_name"] = audited_post.get("source_name", "")
+                try:
+                    audio_urls["en"] = generate_post_audio(en_input, lang="en")
+                except Exception as e:
+                    print(f"⚠️ EN Audio generation warning: {e}")
         else:
             print("[Step 4/5] Audio generation skipped (TTS disabled or post not approved).")
 
         # Step 5: Publish to Hugo
         print(f"[Step 5/5] Publishing to Hugo (Approved: {is_approved}, Score: {score}/100)...")
-        file_path = publish_post(
+        result_files = publish_post(
             post_data=audited_post,
             is_approved=is_approved,
             audit_score=score,
             audit_notes=audit_notes,
             article_id=article.get("article_id"),
-            audio_url=audio_url
+            audio_url=audio_urls
         )
 
         if is_approved:
             published_count += 1
-            audio_tag = f" 🎧 [Audio: {audio_url}]" if audio_url else ""
-            print(f"🎉 Successfully Published: {file_path.name}{audio_tag}")
+            if isinstance(result_files, dict):
+                fa_aud = f" [FA Audio: {audio_urls.get('fa')}]" if audio_urls.get('fa') else ""
+                en_aud = f" [EN Audio: {audio_urls.get('en')}]" if audio_urls.get('en') else ""
+                print(f"🎉 Successfully Published Bilingual Article ({slug}):")
+                print(f"   • FA: {result_files['fa'].name}{fa_aud}")
+                print(f"   • EN: {result_files['en'].name}{en_aud}")
+            else:
+                print(f"🎉 Successfully Published: {result_files.name}")
         else:
             flagged_count += 1
-            print(f"⚠️ Flagged as Draft for Manual Review: {file_path.name}")
+            if isinstance(result_files, dict):
+                print(f"⚠️ Flagged as Drafts: {result_files['fa'].name}, {result_files['en'].name}")
+            else:
+                print(f"⚠️ Flagged as Draft for Manual Review: {result_files.name}")
 
     print("\n" + "=" * 60)
     print("📊 Pipeline Execution Summary:")

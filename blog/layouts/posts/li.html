@@ -1,0 +1,11 @@
+<li>
+  <span class="date">{{ .Date | time.Format (.Site.Params.dateFormat | default "January 2, 2006" ) }}</span>
+  <a class="title" href="{{ .Params.externalLink | default .RelPermalink }}">
+    {{ .Title }}
+    {{ if or .Params.audio .Params.audio_file }}
+      <span class="post-audio-badge" title="{{ if eq .Language.Lang "fa" }}دارای نسخه صوتی{{ else }}Has audio narration{{ end }}">
+        <i class="fa-solid fa-headphones"></i>
+      </span>
+    {{ end }}
+  </a>
+</li>

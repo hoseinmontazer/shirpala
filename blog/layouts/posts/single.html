@@ -31,6 +31,18 @@
         </div>
       </header>
 
+      {{ if .IsTranslated }}
+        <div class="post-translation-banner">
+          <i class="fa-solid fa-language" aria-hidden="true"></i>
+          {{ range .Translations }}
+            <span class="notice-text">
+              {{ if eq .Language.Lang "fa" }}نسخه فارسی این مقاله:{{ else }}Read this article in English:{{ end }}
+            </span>
+            <a href="{{ .RelPermalink }}" class="translation-link">{{ .Title }} &rarr;</a>
+          {{ end }}
+        </div>
+      {{ end }}
+
       {{ partial "posts/audio.html" . }}
 
       <div class="post-content">
