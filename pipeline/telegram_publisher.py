@@ -45,8 +45,8 @@ def _build_telegram_caption(
     en_url = f"{SITE_BASE_URL}/en/posts/{slug}/"
     hashtags = _format_hashtags(tags)
 
-    header = "🎙 <b>پادکست و تحلیل فنی شیرپالا</b>" if is_podcast else "🚀 <b>مقاله جدید در پایگاه فنی شیرپالا</b>"
-    channel_display = TELEGRAM_CHANNEL_ID if TELEGRAM_CHANNEL_ID.startswith("@") else "کانال شیرپالا"
+    header = "🎙 <b>پادکست و تحلیل فنی نولی (Knowly)</b>" if is_podcast else "🚀 <b>مقاله جدید در پایگاه فنی نولی (Knowly)</b>"
+    channel_display = TELEGRAM_CHANNEL_ID if TELEGRAM_CHANNEL_ID.startswith("@") else "کانال نولی (Knowly)"
 
     # Base structure
     caption_template = (
@@ -132,7 +132,7 @@ def broadcast_to_telegram(
                         "caption": caption,
                         "parse_mode": "HTML",
                         "title": title[:64],
-                        "performer": "رادیو شیرپالا | Shirpala Radio",
+                        "performer": "رادیو نولی | Knowly Podcast",
                     },
                     files={"audio": (audio_file_path.name, f, "audio/mpeg")},
                     proxies=proxies,
@@ -217,7 +217,7 @@ def test_telegram_connection() -> bool:
     print(f"\n[Step 2/2] Sending test message to channel '{TELEGRAM_CHANNEL_ID}'...")
     try:
         test_text = (
-            "🚀 <b>اتصال بات رادیو و وبلاگ شیرپالا با موفقیت برقرار شد.</b>\n\n"
+            "🚀 <b>اتصال بات وبلاگ و پادکست نولی (Knowly) با موفقیت برقرار شد.</b>\n\n"
             "این یک پیام آزمایشی برای تایید دسترسی بات به کانال است.\n"
             "از این پس خلاصه مقالات و پادکست‌های صوتی به صورت خودکار در این کانال منتشر خواهند شد.\n\n"
             "🌐 https://blog.knowly.ir"

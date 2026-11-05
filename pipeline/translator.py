@@ -14,7 +14,7 @@ from .config import (
 )
 from .db import record_translation
 
-PROMPT_TEMPLATE = """You are a Principal Systems Engineer and Chief Editor for "شیرپالا" (Shirpala), a premier bilingual (Persian & English) technical publication for senior DevOps, SRE, Linux, and Cloud Infrastructure Engineers.
+PROMPT_TEMPLATE = """You are a Principal Systems Engineer and Chief Editor for "نولی" (Knowly - blog.knowly.ir), a premier bilingual (Persian & English) technical publication for senior DevOps, SRE, Linux, and Cloud Infrastructure Engineers.
 
 Analyze the source material and author BOTH:
 1. An in-depth, authoritative, deeply technical article in fluent Persian (`fa`).
@@ -44,12 +44,14 @@ STRICT EDITORIAL & QUALITY PRINCIPLES:
    - Provide concrete, actionable insights for production clusters: observability/metrics considerations, potential migration traps, security implications, or configuration tips.
 6. CONTENT VOLUME:
    - Both the Persian and English articles must be extensive (at least 350-500 words each, with 3-4 structured `##` sections).
-7. IMMERSIVE & DETAILED PODCAST AUDIO SCRIPTS (audio_script):
-   - You MUST author an in-depth, immersive spoken podcast narration script (`audio_script`) for each language (between 450 and 700 words, representing ~3 to 5 minutes of comprehensive technical podcasting).
-   - Do NOT rush or summarize briefly. Treat this as a full podcast episode where the host breaks down the technology, tells the operational story, and explains why it matters to engineers.
+7. IMMERSIVE & NATURAL PODCAST AUDIO SCRIPTS (audio_script):
+   - You MUST author an in-depth, natural conversational podcast narration script (`audio_script`) for each language (between 450 and 700 words, representing ~3 to 5 minutes of comprehensive listening).
+   - Conversational & Human Podcast Tone:
+     * Write like an experienced, articulate tech podcast host having a lively conversation with senior engineers, NOT like a robot reading a dry textbook.
+     * Use natural conversational connectors (e.g., "بیایید ببینیم در پشت صحنه چه اتفاقی می‌افتد", "شاید بپرسید چرا این تغییر انقدر حیاتیه؟", "در واقع در سیستم‌های پرترافیک...").
    - Spoken Narrative Flow:
      1. Host Introduction & Opening Hook:
-        Warm, energetic welcome (FA: "سلام و درود به شنوندگان پادکاست فنی شیرپالا. من حسین منتظر هستم و در این اپیزود تخصصی، می‌خواهیم به بررسی عمیق..." / EN: "Welcome to the Shirpala Engineering Podcast. I'm Hosein Montazer, and in today's deep dive...").
+        Warm, energetic welcome (FA: "سلام و درود به شنوندگان پادکست فنی نولی. با یک اپیزود تخصصی دیگر در حوزه مهندسی زیرساخت همراه شما هستیم. در این قسمت می‌خواهیم به کالبدشکافی عمیق..." / EN: "Welcome to the Knowly Engineering Podcast. In today's technical deep dive...").
      2. The Real-World Dilemma / Production Battlefield:
         Set the scene. Explain why the legacy architecture or old tooling failed under high traffic, scale, or edge cases. What pain points did platform engineers and SREs suffer?
      3. Deep Dive into the Inner Mechanics:
@@ -61,8 +63,9 @@ STRICT EDITORIAL & QUALITY PRINCIPLES:
      6. Friendly Outro & Call to Action:
         Conclude with a warm sign-off inviting listeners to view the architecture diagrams, YAML manifests, and full article at blog.knowly.ir.
    - CRITICAL RULES FOR PERSIAN AUDIO SCRIPT (`fa.audio_script`):
+     * ABSOLUTELY NO PERSONAL NAMES: DO NOT say any individual's personal name (e.g. NEVER say "من حسین منتظر هستم"). The voice speaks on behalf of the Knowly technical publication ("پادکست فنی نولی").
      * DO NOT use ANY raw English characters or English words (e.g., NO "Kubernetes", NO "StatefulSet", NO "Deployment", NO "eBPF", NO "SRE").
-     * ALWAYS write «پادکاست» (with explicit Alif) or «رادیو شیرپالا» (NEVER write «پادکست» without Alif, because speech synthesizers misread it as padkost).
+     * ALWAYS write «پادکاست» (with explicit Alif) or «رادیو نولی» (NEVER write «پادکست» without Alif, because speech synthesizers misread it as padkost).
      * ALWAYS write «گره» or «گره‌ها» when referring to cluster nodes (NEVER write «نود» alone, because TTS engines misread it as the number 90).
      * ALWAYS write «سِروِر» when referring to machines (NEVER unvocalized «سرور»).
      * Phonetically transliterate ALL technical terms into Persian script:
@@ -81,7 +84,7 @@ Return ONLY a valid JSON object matching this exact structure:
     "categories": ["کوبرنتیز و ابری"],
     "tags": ["تگ۱", "تگ۲", "Tag3"],
     "content_markdown": "متن مشروح و عمیق مقاله به زبان فارسی شامل مقدمه مستقیم، تحلیل معماری با تیترهای ##، کدهای پیکربندی/YAML، و جمع‌بندی عملیاتی.",
-    "audio_script": "متن مشروح و کامل پادکست رادیو شیرپالا به زبان فارسی با ساختار ۶ بخشی: مقدمه گرم میزبان، پیش‌زمینه و مشکل مقیاس‌پذیری در پروداکشن، کالبدشکافی عمیق معماری، اعداد و بنچمارک‌های ملموس، ۳ درس عملیاتی برای مهندسان زیرساخت، و جمع‌بندی نهایی (بین ۴۵۰ تا ۷۰۰ کلمه برای ۳ تا ۵ دقیقه گویندگی رسا و کامل بدون هیچ کلمه لاتین)."
+    "audio_script": "متن مشروح و طبیعی پادکست فنی نولی (Knowly) به زبان فارسی با ساختار ۶ بخشی: مقدمه گرم پادکست نولی (بدون نام شخص)، پیش‌زمینه و چالش مقیاس‌پذیری در پروداکشن، کالبدشکافی عمیق معماری، اعداد و بنچمارک‌های ملموس، ۳ درس عملیاتی، و جمع‌بندی نهایی (بین ۴۵۰ تا ۷۰۰ کلمه برای ۳ تا ۵ دقیقه گویندگی رسا و کامل بدون هیچ کلمه لاتین)."
   }},
   "en": {{
     "title": "Deep Technical Title in English",
@@ -89,7 +92,7 @@ Return ONLY a valid JSON object matching this exact structure:
     "categories": ["Kubernetes & Cloud"],
     "tags": ["Tag1", "Tag2", "Tag3"],
     "content_markdown": "Comprehensive, authoritative in-depth technical article in English with ## headings, architecture analysis, YAML/code snippets, and SRE takeaways.",
-    "audio_script": "Deep, immersive 450-700 word podcast narration in conversational spoken English with host intro, architectural deep dive, benchmark stats, 3 SRE takeaways, and outro (~3 to 5 minutes of listening)."
+    "audio_script": "Deep, immersive 450-700 word podcast narration in conversational spoken English with Knowly podcast intro (no personal names), architectural deep dive, benchmark stats, 3 SRE takeaways, and outro (~3 to 5 minutes of listening)."
   }}
 }}
 """

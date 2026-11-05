@@ -32,11 +32,12 @@ elif GEMINI_API_KEY:
 else:
     LLM_PROVIDER = "mock"
 
-# Audio & TTS Configuration (Piper TTS on NexusLLM)
+# Audio & TTS Configuration (Default: Studio Neural Voice via edge-tts, or Piper on Nexus)
 TTS_ENABLED = os.getenv("TTS_ENABLED", "true").lower() in ("true", "1", "yes")
-TTS_PROVIDER = os.getenv("TTS_PROVIDER", "nexus").lower()  # "nexus" or "edge"
+TTS_PROVIDER = os.getenv("TTS_PROVIDER", "edge").lower()  # "edge" (Studio Neural) or "nexus" (Piper)
 TTS_MODEL = os.getenv("TTS_MODEL", "piper")
-TTS_VOICE = os.getenv("TTS_VOICE", "fa_IR-amir-medium")
+TTS_VOICE = os.getenv("TTS_VOICE", "fa-IR-FaridNeural")
+TTS_VOICE_EN = os.getenv("TTS_VOICE_EN", "en-US-AndrewMultilingualNeural")
 AUDIO_OUTPUT_DIR = Path(os.getenv("AUDIO_OUTPUT_DIR", str(BASE_DIR / "blog" / "static" / "audio" / "posts")))
 
 # Whisper STT Configuration

@@ -76,15 +76,15 @@ def prepare_audio_script(post_data: Dict[str, Any], lang: str = "fa") -> str:
         body_summary = " ".join(body_paras)
 
         parts = [
-            "سلام و درود، به پادکست فنی شیرپلا خوش آمدید.",
-            f"در این قسمت، به بررسی و تحلیل گزارش {title_clean} می‌پردازیم.",
+            "سلام و درود، به پادکست فنی نولی خوش آمدید.",
+            f"در این اپیزود، به بررسی و تحلیل گزارش {title_clean} می‌پردازیم.",
             desc_clean,
             body_summary,
             "از کلیدی‌ترین توصیه‌های عملیاتی برای مهندسان زیرساخت، توجه ویژه به پایش مستمر متریک‌ها، تنظیم دقیق منابع و ارتقای تاب‌آوری سیستم است.",
-            "از اینکه همراه پادکست شیرپلا بودید سپاسگزاریم."
+            "از اینکه همراه پادکست فنی نولی در وب‌سایت blog.knowly.ir بودید سپاسگزاریم."
         ]
         full_script = " ".join([p for p in parts if p]).strip()
-        return clean_persian_tts_script(full_script)[:3500]
+        return clean_persian_tts_script(full_script)[:8000]
 
     else:
         title_clean = clean_english_tts_script(title)
@@ -103,15 +103,15 @@ def prepare_audio_script(post_data: Dict[str, Any], lang: str = "fa") -> str:
         body_summary = " ".join(body_paras)
 
         parts = [
-            "Welcome to the Shirpala technical audio podcast.",
+            "Welcome to the Knowly technical audio podcast.",
             f"In today's engineering breakdown, we investigate {title_clean}.",
             desc_clean,
             body_summary,
             "Key operational recommendations emphasize hardened boundaries, granular telemetry, and proactive capacity planning.",
-            "Thank you for listening to Shirpala."
+            "Thank you for listening to Knowly at blog.knowly.ir."
         ]
         full_script = " ".join([p for p in parts if p]).strip()
-        return clean_english_tts_script(full_script)[:3500]
+        return clean_english_tts_script(full_script)[:8000]
 
 def _split_into_chunks(text: str, max_chunk_chars: int = 180) -> List[str]:
     """Split long text into natural sentence-based chunks to prevent Nexus TTS timeout."""

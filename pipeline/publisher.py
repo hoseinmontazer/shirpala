@@ -28,8 +28,8 @@ def format_hugo_post(
     title = post_data.get("title", "").replace('"', '\\"')
     description = post_data.get("description", "").replace('"', '\\"')
     
-    # Default authors based on language
-    default_author = "حسین منتظر" if lang == "fa" else "Hosein Montazer"
+    # Default editorial author
+    default_author = "تیم فنی نولی" if lang == "fa" else "Knowly Engineering Team"
     author = post_data.get("author", default_author).replace('"', '\\"')
     link = post_data.get("link", "").replace('"', '\\"')
 
