@@ -36,3 +36,4 @@ For infrastructure and security practitioners, this vulnerability highlights tha
 
 ---
 Source: [Linux Weekly News — User namespaces + file capabilities = trouble](https://lwn.net/Articles/1103429/)
+

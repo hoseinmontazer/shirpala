@@ -34,6 +34,7 @@ else:
 
 # Audio & TTS Configuration (Piper TTS on NexusLLM)
 TTS_ENABLED = os.getenv("TTS_ENABLED", "true").lower() in ("true", "1", "yes")
+TTS_PROVIDER = os.getenv("TTS_PROVIDER", "nexus").lower()  # "nexus" or "edge"
 TTS_MODEL = os.getenv("TTS_MODEL", "piper")
 TTS_VOICE = os.getenv("TTS_VOICE", "fa_IR-amir-medium")
 AUDIO_OUTPUT_DIR = Path(os.getenv("AUDIO_OUTPUT_DIR", str(BASE_DIR / "blog" / "static" / "audio" / "posts")))

@@ -52,3 +52,4 @@ Platform and SRE teams executing cluster-wide migration should pay attention to 
 
 ---
 Source: [Kubernetes Official Blog — The Kubernetes Shift to cgroup v2](https://kubernetes.io/blog/2026/10/06/kubernetes-cgroups-v2-shift/)
+

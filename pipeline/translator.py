@@ -39,11 +39,26 @@ STRICT EDITORIAL & QUALITY PRINCIPLES:
    - Retain all benchmarks, performance percentages, latency percentiles (p95, p99), version numbers, and concrete metrics mentioned in the source.
    - Include realistic YAML configuration, shell commands, or code snippets in both articles.
 4. ACCURATE TECHNICAL TERMINOLOGY:
-   - For Persian: Keep standard English technical terms in parentheses on first mention (e.g., گذرگاه داده سریع (XDP / eXpress Data Path), تخصیص پویای منابع (Dynamic Resource Allocation)).
+   - For Persian: Keep standard English technical terms in parentheses on first mention in `content_markdown` (e.g., گذرگاه داده سریع (XDP / eXpress Data Path), تخصیص پویای منابع (Dynamic Resource Allocation)).
 5. SRE PRODUCTION TAKEAWAYS:
    - Provide concrete, actionable insights for production clusters: observability/metrics considerations, potential migration traps, security implications, or configuration tips.
 6. CONTENT VOLUME:
    - Both the Persian and English articles must be extensive (at least 350-500 words each, with 3-4 structured `##` sections).
+7. COMPREHENSIVE PODCAST AUDIO SCRIPTS (audio_script):
+   - You MUST author an engaging, comprehensive audio podcast narration script (`audio_script`) for each language (between 250 and 400 words, representing ~2 minutes of rich spoken audio).
+   - The script must follow a complete spoken narrative:
+     1. Warm welcome to Shirpala technical podcast.
+     2. Core architectural dilemma or infrastructure challenge.
+     3. In-depth technical resolution and system components.
+     4. 3 practical production takeaways for SREs and platform engineers.
+   - CRITICAL RULES FOR PERSIAN AUDIO SCRIPT (`fa.audio_script`):
+     * DO NOT use ANY raw English characters or English words (e.g., NO "Kubernetes", NO "StatefulSet", NO "Deployment", NO "eBPF", NO "SRE").
+     * Phonetically transliterate ALL technical terms into Persian script:
+       «کوبرنتیز»، «دیپلوی‌منت»، «استیت‌فول‌ست»، «دیمن‌ست»، «ای‌بی‌پی‌اف»، «اس‌آر‌ای»، «داکر»، «پاد»، «پادها»، «کرنل»، «لینوکس»، «سی‌پی‌یو»، «رم»، «هوش مصنوعی»، «سیگ اپس»، «اوپن‌تله‌متری»، «پرومتئوس».
+     * Write short, rhythmic, flowing sentences with frequent commas (،) so the speech synthesizer breathes naturally with human intonation.
+     * Absolutely NO markdown fences, NO asterisks, NO hashes, NO bullet points, NO parentheses.
+   - FOR ENGLISH AUDIO SCRIPT (`en.audio_script`):
+     * 250-400 words of natural, conversational spoken narrative without markdown syntax.
 
 Return ONLY a valid JSON object matching this exact structure:
 {{
@@ -53,14 +68,16 @@ Return ONLY a valid JSON object matching this exact structure:
     "description": "خلاصه دو جمله‌ای بسیار دقیق و فنی برای متادیتا",
     "categories": ["کوبرنتیز و ابری"],
     "tags": ["تگ۱", "تگ۲", "Tag3"],
-    "content_markdown": "متن مشروح و عمیق مقاله به زبان فارسی شامل مقدمه مستقیم، تحلیل معماری با تیترهای ##، کدهای پیکربندی/YAML، و جمع‌بندی عملیاتی."
+    "content_markdown": "متن مشروح و عمیق مقاله به زبان فارسی شامل مقدمه مستقیم، تحلیل معماری با تیترهای ##، کدهای پیکربندی/YAML، و جمع‌بندی عملیاتی.",
+    "audio_script": "متن مشروح پادکست به زبان فارسی با جملات روان، کوتاه، ریتمیک، با ویرگول‌های مکرر و نگارش تمام اصطلاحات فنی به خط فارسی (حداقل ۲۵۰ کلمه برای ۲ دقیقه گویندگی رسا)."
   }},
   "en": {{
     "title": "Deep Technical Title in English",
     "description": "Two-sentence technical overview and metadata summary in English",
     "categories": ["Kubernetes & Cloud"],
     "tags": ["Tag1", "Tag2", "Tag3"],
-    "content_markdown": "Comprehensive, authoritative in-depth technical article in English with ## headings, architecture analysis, YAML/code snippets, and SRE takeaways."
+    "content_markdown": "Comprehensive, authoritative in-depth technical article in English with ## headings, architecture analysis, YAML/code snippets, and SRE takeaways.",
+    "audio_script": "Engaging, conversational 250-400 word audio podcast brief in clear spoken English."
   }}
 }}
 """
