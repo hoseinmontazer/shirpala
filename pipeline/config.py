@@ -59,3 +59,11 @@ HUGO_REBUILD_ON_PUBLISH = os.getenv("HUGO_REBUILD_ON_PUBLISH", "true").lower() i
 # Quality & Audit Rules
 MIN_BODY_WORD_COUNT = int(os.getenv("MIN_BODY_WORD_COUNT", "250"))
 AUTO_PUBLISH_APPROVED = os.getenv("AUTO_PUBLISH_APPROVED", "true").lower() in ("true", "1", "yes")
+
+# Telegram Channel Publishing
+TELEGRAM_ENABLED = os.getenv("TELEGRAM_ENABLED", "false").lower() in ("true", "1", "yes")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID", "").strip()
+TELEGRAM_SEND_AUDIO = os.getenv("TELEGRAM_SEND_AUDIO", "true").lower() in ("true", "1", "yes")
+TELEGRAM_PROXY = os.getenv("TELEGRAM_PROXY", "").strip()
+SITE_BASE_URL = os.getenv("SITE_BASE_URL", "https://blog.knowly.ir").rstrip("/")

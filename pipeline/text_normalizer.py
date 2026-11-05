@@ -247,6 +247,12 @@ BASE_TECHNICAL_DICTIONARY: Dict[str, str] = {
     "Pull Request": "پول ریکوئست",
     "Issue": "ایشو",
 
+    # Media & Platforms
+    "podcast": "پادکاست",
+    "podcasts": "پادکاست‌ها",
+    "blog": "بلاگ",
+    "post": "پست",
+
     # Cloud Providers
     "AWS": "ای‌دبلیواس",
     "GCP": "جی‌سی‌پی",
@@ -331,6 +337,46 @@ def normalize_numbers_versions_and_units(text: str) -> str:
     text = re.sub(r'(\d+)\s*(?:MHz)\b', r'\1 مگاهرتز', text, flags=re.IGNORECASE)
     text = re.sub(r'(\d+)\s*-?\s*bit\b', r'\1 بیتی', text, flags=re.IGNORECASE)
 
+    return text
+
+# Persian Homographs & Vowel Disambiguation for Piper/eSpeak
+# Solves eSpeak mispronunciations (e.g. پادکست -> padkost, سرور -> sarvar, نود -> navad)
+PERSIAN_HOMOGRAPH_FIXES: Dict[str, str] = {
+    # Fix 'پادکست' which eSpeak reads as 'padkost' -> change to 'پادکاست' with clear long vowel
+    r'\bپادکست\b': 'پادکاست',
+    r'\bپادکست‌ها\b': 'پادکاست‌ها',
+    r'\bپادکستهای\b': 'پادکاست‌های',
+    r'\bپادکستی\b': 'پادکاستی',
+
+    # Fix 'سرور' which eSpeak reads as 'sarvar' (master) -> vocalize to 'سِروِر'
+    r'\bسرور\b': 'سِروِر',
+    r'\bسرورها\b': 'سِروِرها',
+    r'\bسرورهای\b': 'سِروِرهای',
+    r'\bسروری\b': 'سِروِری',
+
+    # Fix 'نود' which eSpeak reads as 'navad' (the number 90) -> use 'گره'
+    r'\bنودها\b': 'گره‌ها',
+    r'\bنودهای\b': 'گره‌های',
+    r'\bنود\b': 'گره',
+
+    # Fix 'دواپس' which eSpeak reads as 'davapes' -> 'دِواپس'
+    r'\bدواپس\b': 'دِواپس',
+
+    # Fix 'کانتینر' -> 'کانتِینِر'
+    r'\bکانتینر\b': 'کانتِینِر',
+    r'\bکانتینرها\b': 'کانتِینِرها',
+    r'\bکانتینرهای\b': 'کانتِینِرهای',
+
+    # Fix 'کلاستر' -> 'کِلاستِر'
+    r'\bکلاستر\b': 'کِلاستِر',
+    r'\bکلاسترها\b': 'کِلاستِرها',
+    r'\bکلاسترهای\b': 'کِلاستِرهای',
+}
+
+def normalize_persian_homographs(text: str) -> str:
+    """Disambiguate common Persian technical homographs for accurate speech synthesis."""
+    for pattern, replacement in PERSIAN_HOMOGRAPH_FIXES.items():
+        text = re.sub(pattern, replacement, text)
     return text
 
 def _transliterate_unmapped_english_with_llm(words: List[str]) -> Dict[str, str]:
@@ -470,7 +516,11 @@ def normalize_mixed_persian_english_text(
         # Remove any lingering standalone English letters to avoid TTS glitches
         text = re.sub(r'\b[a-zA-Z]+\b', '', text)
 
-    # Step 5: Normalize Punctuation for Speech Breathing & Cadence
+    # Step 5: Disambiguate Persian Homographs & Speech Engine Pronunciation Bugs
+    # (e.g. transforms پادکست -> پادکاست, سرور -> سِروِر, نود -> گره)
+    text = normalize_persian_homographs(text)
+
+    # Step 6: Normalize Punctuation for Speech Breathing & Cadence
     # Convert colons, semicolons, and dashes into commas for natural breathing pauses
     text = re.sub(r'[:؛–—]', '،', text)
     text = re.sub(r'[ \t]+', ' ', text)

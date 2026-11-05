@@ -14,7 +14,7 @@ from .config import (
 )
 from .db import record_translation
 
-PROMPT_TEMPLATE = """You are a Principal Systems Engineer and Chief Editor for "شیرپلا" (Shirpala), a premier bilingual (Persian & English) technical publication for senior DevOps, SRE, Linux, and Cloud Infrastructure Engineers.
+PROMPT_TEMPLATE = """You are a Principal Systems Engineer and Chief Editor for "شیرپالا" (Shirpala), a premier bilingual (Persian & English) technical publication for senior DevOps, SRE, Linux, and Cloud Infrastructure Engineers.
 
 Analyze the source material and author BOTH:
 1. An in-depth, authoritative, deeply technical article in fluent Persian (`fa`).
@@ -44,21 +44,33 @@ STRICT EDITORIAL & QUALITY PRINCIPLES:
    - Provide concrete, actionable insights for production clusters: observability/metrics considerations, potential migration traps, security implications, or configuration tips.
 6. CONTENT VOLUME:
    - Both the Persian and English articles must be extensive (at least 350-500 words each, with 3-4 structured `##` sections).
-7. COMPREHENSIVE PODCAST AUDIO SCRIPTS (audio_script):
-   - You MUST author an engaging, comprehensive audio podcast narration script (`audio_script`) for each language (between 250 and 400 words, representing ~2 minutes of rich spoken audio).
-   - The script must follow a complete spoken narrative:
-     1. Warm welcome to Shirpala technical podcast.
-     2. Core architectural dilemma or infrastructure challenge.
-     3. In-depth technical resolution and system components.
-     4. 3 practical production takeaways for SREs and platform engineers.
+7. IMMERSIVE & DETAILED PODCAST AUDIO SCRIPTS (audio_script):
+   - You MUST author an in-depth, immersive spoken podcast narration script (`audio_script`) for each language (between 450 and 700 words, representing ~3 to 5 minutes of comprehensive technical podcasting).
+   - Do NOT rush or summarize briefly. Treat this as a full podcast episode where the host breaks down the technology, tells the operational story, and explains why it matters to engineers.
+   - Spoken Narrative Flow:
+     1. Host Introduction & Opening Hook:
+        Warm, energetic welcome (FA: "سلام و درود به شنوندگان پادکاست فنی شیرپالا. من حسین منتظر هستم و در این اپیزود تخصصی، می‌خواهیم به بررسی عمیق..." / EN: "Welcome to the Shirpala Engineering Podcast. I'm Hosein Montazer, and in today's deep dive...").
+     2. The Real-World Dilemma / Production Battlefield:
+        Set the scene. Explain why the legacy architecture or old tooling failed under high traffic, scale, or edge cases. What pain points did platform engineers and SREs suffer?
+     3. Deep Dive into the Inner Mechanics:
+        Explain how the new system, kernel mechanism, algorithm, or controller operates under the hood. Walk through the workflow step-by-step with clear mental models.
+     4. Concrete Numbers, Latency & Benchmarks:
+        Quote concrete metrics from the article: p99 latency improvements, CPU/memory reduction, throughput gains, or release version numbers.
+     5. 3 Battle-Tested SRE & Production Takeaways:
+        Share 3 practical, actionable tips for cluster administrators: flags to set, pitfalls to watch for, or metrics to scrape.
+     6. Friendly Outro & Call to Action:
+        Conclude with a warm sign-off inviting listeners to view the architecture diagrams, YAML manifests, and full article at blog.knowly.ir.
    - CRITICAL RULES FOR PERSIAN AUDIO SCRIPT (`fa.audio_script`):
      * DO NOT use ANY raw English characters or English words (e.g., NO "Kubernetes", NO "StatefulSet", NO "Deployment", NO "eBPF", NO "SRE").
+     * ALWAYS write «پادکاست» (with explicit Alif) or «رادیو شیرپالا» (NEVER write «پادکست» without Alif, because speech synthesizers misread it as padkost).
+     * ALWAYS write «گره» or «گره‌ها» when referring to cluster nodes (NEVER write «نود» alone, because TTS engines misread it as the number 90).
+     * ALWAYS write «سِروِر» when referring to machines (NEVER unvocalized «سرور»).
      * Phonetically transliterate ALL technical terms into Persian script:
        «کوبرنتیز»، «دیپلوی‌منت»، «استیت‌فول‌ست»، «دیمن‌ست»، «ای‌بی‌پی‌اف»، «اس‌آر‌ای»، «داکر»، «پاد»، «پادها»، «کرنل»، «لینوکس»، «سی‌پی‌یو»، «رم»، «هوش مصنوعی»، «سیگ اپس»، «اوپن‌تله‌متری»، «پرومتئوس».
      * Write short, rhythmic, flowing sentences with frequent commas (،) so the speech synthesizer breathes naturally with human intonation.
      * Absolutely NO markdown fences, NO asterisks, NO hashes, NO bullet points, NO parentheses.
    - FOR ENGLISH AUDIO SCRIPT (`en.audio_script`):
-     * 250-400 words of natural, conversational spoken narrative without markdown syntax.
+     * 450-700 words of conversational, highly engaging spoken narrative without markdown syntax, following the same 6-part podcast structure.
 
 Return ONLY a valid JSON object matching this exact structure:
 {{
@@ -69,7 +81,7 @@ Return ONLY a valid JSON object matching this exact structure:
     "categories": ["کوبرنتیز و ابری"],
     "tags": ["تگ۱", "تگ۲", "Tag3"],
     "content_markdown": "متن مشروح و عمیق مقاله به زبان فارسی شامل مقدمه مستقیم، تحلیل معماری با تیترهای ##، کدهای پیکربندی/YAML، و جمع‌بندی عملیاتی.",
-    "audio_script": "متن مشروح پادکست به زبان فارسی با جملات روان، کوتاه، ریتمیک، با ویرگول‌های مکرر و نگارش تمام اصطلاحات فنی به خط فارسی (حداقل ۲۵۰ کلمه برای ۲ دقیقه گویندگی رسا)."
+    "audio_script": "متن مشروح و کامل پادکست رادیو شیرپالا به زبان فارسی با ساختار ۶ بخشی: مقدمه گرم میزبان، پیش‌زمینه و مشکل مقیاس‌پذیری در پروداکشن، کالبدشکافی عمیق معماری، اعداد و بنچمارک‌های ملموس، ۳ درس عملیاتی برای مهندسان زیرساخت، و جمع‌بندی نهایی (بین ۴۵۰ تا ۷۰۰ کلمه برای ۳ تا ۵ دقیقه گویندگی رسا و کامل بدون هیچ کلمه لاتین)."
   }},
   "en": {{
     "title": "Deep Technical Title in English",
@@ -77,7 +89,7 @@ Return ONLY a valid JSON object matching this exact structure:
     "categories": ["Kubernetes & Cloud"],
     "tags": ["Tag1", "Tag2", "Tag3"],
     "content_markdown": "Comprehensive, authoritative in-depth technical article in English with ## headings, architecture analysis, YAML/code snippets, and SRE takeaways.",
-    "audio_script": "Engaging, conversational 250-400 word audio podcast brief in clear spoken English."
+    "audio_script": "Deep, immersive 450-700 word podcast narration in conversational spoken English with host intro, architectural deep dive, benchmark stats, 3 SRE takeaways, and outro (~3 to 5 minutes of listening)."
   }}
 }}
 """

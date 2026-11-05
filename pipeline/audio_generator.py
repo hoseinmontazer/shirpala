@@ -1,6 +1,7 @@
 import os
 import re
 import io
+import time
 import wave
 import json
 import shutil
@@ -8,6 +9,7 @@ import tempfile
 import subprocess
 import urllib.request
 import urllib.error
+import concurrent.futures
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from .config import (
@@ -47,9 +49,9 @@ def prepare_audio_script(post_data: Dict[str, Any], lang: str = "fa") -> str:
     script_candidate = post_data.get("audio_script", "").strip()
     if script_candidate and len(script_candidate) > 120:
         if lang == "fa":
-            return clean_persian_tts_script(script_candidate)[:3500]
+            return clean_persian_tts_script(script_candidate)[:8000]
         else:
-            return clean_english_tts_script(script_candidate)[:3500]
+            return clean_english_tts_script(script_candidate)[:8000]
 
     # 2. Comprehensive fallback script generation from content body
     title = post_data.get("title", "").strip()
@@ -197,18 +199,30 @@ def _call_nexus_tts_chunked(script: str, model: str, voice: str) -> Optional[byt
     chunks = _split_into_chunks(script, max_chunk_chars=180)
     print(f"[AudioTTS] Processing {len(chunks)} speech chunk(s) via Nexus ({model})...")
 
-    wav_buffers = []
-    for idx, chunk in enumerate(chunks, 1):
-        wb = _call_nexus_single_chunk(chunk, model, voice)
-        if wb:
-            wav_buffers.append(wb)
-        else:
-            print(f"[AudioTTS] Chunk {idx}/{len(chunks)} failed on Nexus.")
+    # Synthesize chunks concurrently (3 workers) while preserving exact sequence order
+    wav_buffers: List[Optional[bytes]] = [None] * len(chunks)
 
-    if not wav_buffers:
+    def _fetch_chunk(idx: int, ch: str):
+        wb = _call_nexus_single_chunk(ch, model, voice)
+        if not wb:
+            time.sleep(0.4)
+            wb = _call_nexus_single_chunk(ch, model, voice)
+        return idx, wb
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [executor.submit(_fetch_chunk, i, ch) for i, ch in enumerate(chunks)]
+        for fut in concurrent.futures.as_completed(futures):
+            idx, wb = fut.result()
+            if wb:
+                wav_buffers[idx] = wb
+            else:
+                print(f"[AudioTTS] Warning: Chunk {idx + 1}/{len(chunks)} failed on Nexus.")
+
+    valid_wavs = [w for w in wav_buffers if w is not None]
+    if not valid_wavs:
         return None
 
-    return _stitch_wav_buffers(wav_buffers)
+    return _stitch_wav_buffers(valid_wavs)
 
 def _convert_to_mp3(raw_bytes: bytes, output_mp3: Path) -> bool:
     """Save audio bytes as MP3, converting with ffmpeg if source is WAV."""

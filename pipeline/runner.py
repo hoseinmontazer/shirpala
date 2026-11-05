@@ -11,6 +11,7 @@ from .auditor import audit_and_clean_post
 from .publisher import publish_post
 from .audio_generator import generate_post_audio
 from .transcriber import transcribe_audio_file
+from .telegram_publisher import broadcast_to_telegram, test_telegram_connection
 
 def run_pipeline(limit: int = DAILY_MAX_POSTS, enable_tts: bool = TTS_ENABLED):
     """Execute one complete cycle of fetching, translating, auditing, and publishing."""
@@ -106,6 +107,16 @@ def run_pipeline(limit: int = DAILY_MAX_POSTS, enable_tts: bool = TTS_ENABLED):
                 print(f"   • EN: {result_files['en'].name}{en_aud}")
             else:
                 print(f"🎉 Successfully Published: {result_files.name}")
+
+            # Step 6: Broadcast to Telegram (if enabled)
+            try:
+                broadcast_to_telegram(
+                    post_data=audited_post,
+                    audio_urls=audio_urls,
+                    slug=slug
+                )
+            except Exception as e:
+                print(f"⚠️ Telegram broadcast warning: {e}")
         else:
             flagged_count += 1
             if isinstance(result_files, dict):
@@ -217,6 +228,9 @@ def main():
     # Command: stats
     subparsers.add_parser("stats", help="Show pipeline database statistics")
 
+    # Command: telegram-test
+    subparsers.add_parser("telegram-test", help="Test Telegram Bot credentials and channel message delivery")
+
     args = parser.parse_args()
 
     if args.command == "run" or args.command is None:
@@ -234,6 +248,8 @@ def main():
             print(text)
     elif args.command == "stats":
         show_stats()
+    elif args.command == "telegram-test":
+        test_telegram_connection()
 
 if __name__ == "__main__":
     main()
