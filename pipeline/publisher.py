@@ -97,15 +97,10 @@ def trigger_hugo_build():
     docker_bin = shutil.which("docker")
     if docker_bin:
         try:
-            print("[Publisher] Triggering Docker Hugo build...")
-            res = subprocess.run(
-                ["docker", "run", "--rm", "-v", f"{HUGO_SITE_DIR}:/site", "hugo", "hugo", "--baseURL=https://blog.knowly.ir/"],
-                check=False,
-                capture_output=True
-            )
+            # Check if hugo-builder container is running
+            res = subprocess.run(["docker", "exec", "hugo-builder", "hugo", "--baseURL=https://blog.knowly.ir/"], capture_output=True, check=False)
             if res.returncode == 0:
-                print("[Publisher] Docker Hugo build completed successfully.")
-            else:
-                print(f"[Publisher] Docker Hugo build stderr: {res.stderr.decode('utf-8', errors='ignore')}")
-        except Exception as e:
-            print(f"[Publisher] Docker build error: {e}")
+                print("[Publisher] Triggered Hugo build inside hugo-builder container.")
+                return
+        except Exception:
+            pass

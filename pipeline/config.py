@@ -32,10 +32,10 @@ elif GEMINI_API_KEY:
 else:
     LLM_PROVIDER = "mock"
 
-# Audio & TTS Configuration (Kokoro TTS on NexusLLM)
+# Audio & TTS Configuration (Piper TTS on NexusLLM)
 TTS_ENABLED = os.getenv("TTS_ENABLED", "true").lower() in ("true", "1", "yes")
-TTS_MODEL = os.getenv("TTS_MODEL", "kokoro")
-TTS_VOICE = os.getenv("TTS_VOICE", "af_heart")  # Available: af_heart, am_adam, af_bella, etc.
+TTS_MODEL = os.getenv("TTS_MODEL", "piper")
+TTS_VOICE = os.getenv("TTS_VOICE", "fa_IR-amir-medium")
 AUDIO_OUTPUT_DIR = Path(os.getenv("AUDIO_OUTPUT_DIR", str(BASE_DIR / "blog" / "static" / "audio" / "posts")))
 
 # Whisper STT Configuration

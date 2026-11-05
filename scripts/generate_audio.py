@@ -104,8 +104,60 @@ def update_frontmatter_audio(content: str, fm_type: str, audio_path: str) -> str
             return re.sub(r'(---[\s\S]*?)(---)', rf'\1{yaml_entry}\n\2', content, count=1)
     return content
 
-async def synthesize_audio(text: str, voice: str, output_path: str):
-    """Use edge-tts to generate audio file."""
+async def synthesize_audio(text: str, voice: str, output_path: str, lang: str = "en"):
+    """Generate audio file using Nexus Piper for Persian or edge-tts."""
+    nexus_key = os.getenv("NEXUSLLM_API_KEY", "nxs_24d0db882c2ae12c0cecb761f9f2c91e71816c12db887a1e816d2b131c9c7077")
+    nexus_url = os.getenv("NEXUSLLM_BASE_URL", "https://api-nexusllm.dariasystem.com/v1").rstrip("/")
+
+    if lang == "fa" and nexus_key:
+        try:
+            import urllib.request
+            import json
+            import tempfile
+            import shutil
+            
+            # Use concise text for speech
+            speech_input = text[:900]
+            req = urllib.request.Request(
+                f"{nexus_url}/audio/speech",
+                data=json.dumps({
+                    "model": "piper",
+                    "input": speech_input,
+                    "voice": "fa_IR-amir-medium"
+                }).encode("utf-8"),
+                headers={
+                    "Authorization": f"Bearer {nexus_key}",
+                    "Content-Type": "application/json"
+                }
+            )
+            opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+            with opener.open(req, timeout=45) as r:
+                raw_bytes = r.read()
+                if not raw_bytes.startswith(b'{"error"') and len(raw_bytes) > 1000:
+                    ffmpeg_bin = shutil.which("ffmpeg")
+                    if raw_bytes.startswith(b'RIFF') and ffmpeg_bin:
+                        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
+                            tmp_wav.write(raw_bytes)
+                            tmp_wav_path = tmp_wav.name
+                        try:
+                            subprocess.run(
+                                [ffmpeg_bin, "-y", "-i", tmp_wav_path, "-codec:a", "libmp3lame", "-b:a", "128k", output_path],
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True
+                            )
+                            return
+                        finally:
+                            try:
+                                os.remove(tmp_wav_path)
+                            except OSError:
+                                pass
+                    else:
+                        with open(output_path, "wb") as f:
+                            f.write(raw_bytes)
+                        return
+        except Exception as e:
+            print(f"[Warning] Nexus Piper TTS failed: {e}. Falling back to edge-tts...")
+
+    # Fallback / Default: edge-tts
     import edge_tts
     communicate = edge_tts.Communicate(text, voice)
     await communicate.save(output_path)
@@ -147,7 +199,7 @@ def process_file(file_path: Path, force=False):
         return
 
     print(f"Generating audio for [{lang}] {file_path.name} (voice: {voice})...")
-    asyncio.run(synthesize_audio(full_text, voice, str(audio_full)))
+    asyncio.run(synthesize_audio(full_text, voice, str(audio_full), lang=lang))
     print(f"Saved: {audio_full} ({os.path.getsize(audio_full)} bytes)")
 
     # Update post frontmatter

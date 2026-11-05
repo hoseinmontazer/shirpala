@@ -43,8 +43,8 @@ services:
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.8-flash}
       - LLM_PROVIDER=${LLM_PROVIDER:-nexusllm}
       - TTS_ENABLED=${TTS_ENABLED:-true}
-      - TTS_MODEL=${TTS_MODEL:-kokoro}
-      - TTS_VOICE=${TTS_VOICE:-af_heart}
+      - TTS_MODEL=${TTS_MODEL:-piper}
+      - TTS_VOICE=${TTS_VOICE:-fa_IR-amir-medium}
       - WHISPER_MODEL=${WHISPER_MODEL:-whisper-large-v3}
       - SCHEDULE_TIME=${SCHEDULE_TIME:-07:00}
       - DAILY_MAX_POSTS=${DAILY_MAX_POSTS:-3}

@@ -1,5 +1,6 @@
 import json
 import re
+import time
 import urllib.request
 import urllib.error
 from typing import Dict, Any, Optional
@@ -51,7 +52,7 @@ def extract_json_object(raw_text: str) -> Optional[Dict[str, Any]]:
         return None
 
     cleaned = raw_text.strip()
-    # Strip markdown fences if present
+    # Strip markdown code fences if present
     if "```" in cleaned:
         cleaned = re.sub(r'^```(?:json)?\s*', '', cleaned)
         cleaned = re.sub(r'```$', '', cleaned).strip()
@@ -62,7 +63,7 @@ def extract_json_object(raw_text: str) -> Optional[Dict[str, Any]]:
     except Exception:
         pass
 
-    # Find outermost or best JSON block
+    # Find outermost JSON block
     start = raw_text.find('{')
     end = raw_text.rfind('}')
     if start != -1 and end != -1 and end > start:
@@ -70,7 +71,12 @@ def extract_json_object(raw_text: str) -> Optional[Dict[str, Any]]:
         try:
             return json.loads(candidate)
         except Exception:
-            pass
+            # Clean common issues like control characters inside strings
+            try:
+                candidate_cleaned = re.sub(r'[\x00-\x1f\x7f-\x9f]', ' ', candidate)
+                return json.loads(candidate_cleaned)
+            except Exception:
+                pass
 
     return None
 
@@ -79,14 +85,20 @@ def call_nexusllm_api(prompt: str) -> Optional[str]:
     if not NEXUSLLM_API_KEY:
         return None
 
-    endpoint = f"{NEXUSLLM_BASE_URL}/chat/completions"
+    # Base URLs with automatic failover between domain and internal LAN IP
+    base_urls = [NEXUSLLM_BASE_URL]
+    if "api-nexusllm.dariasystem.com" in NEXUSLLM_BASE_URL:
+        base_urls.append("http://192.168.0.200:8880/v1")
+    elif "192.168.0.200" in NEXUSLLM_BASE_URL:
+        base_urls.append("https://api-nexusllm.dariasystem.com/v1")
+
     payload = {
         "model": NEXUSLLM_MODEL,
         "messages": [
             {
                 "role": "system",
                 "content": (
-                    "You are a professional Persian technical writer for Shirpala blog. "
+                    "You are a senior DevOps / Systems Engineer and chief editor for Shirpala blog. "
                     "Output ONLY a valid JSON object with keys: title, description, slug, categories, tags, content_markdown."
                 )
             },
@@ -95,27 +107,54 @@ def call_nexusllm_api(prompt: str) -> Optional[str]:
                 "content": prompt
             }
         ],
-        "max_tokens": 3500,
+        "max_tokens": 5000,
         "temperature": 0.3,
-        "enable_thinking": False
+        # Crucial for vLLM Qwen: shuts off reasoning loop so tokens are 100% available for output
+        "chat_template_kwargs": {"enable_thinking": False}
     }
 
-    req = urllib.request.Request(
-        endpoint,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {NEXUSLLM_API_KEY}",
-            "Content-Type": "application/json"
-        }
-    )
+    # Proxy-safe opener
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
-    try:
-        with urllib.request.urlopen(req, timeout=90) as resp:
-            res_data = json.loads(resp.read().decode("utf-8"))
-            return res_data["choices"][0]["message"]["content"]
-    except Exception as e:
-        print(f"[Translator] NexusLLM call failed: {e}")
-        return None
+    for base_url in base_urls:
+        endpoint = f"{base_url}/chat/completions"
+        for attempt in range(1, 4):
+            req = urllib.request.Request(
+                endpoint,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={
+                    "Authorization": f"Bearer {NEXUSLLM_API_KEY}",
+                    "Content-Type": "application/json"
+                }
+            )
+
+            try:
+                with opener.open(req, timeout=90) as resp:
+                    res_data = json.loads(resp.read().decode("utf-8"))
+                    message = res_data["choices"][0]["message"]
+                    content = message.get("content")
+                    if content and content.strip():
+                        return content
+                    # If content is empty but reasoning exists, try extracting from reasoning
+                    reasoning = message.get("reasoning")
+                    if reasoning and "{" in reasoning and "}" in reasoning:
+                        print("[Translator] Content was empty; using reasoning field as fallback...")
+                        return reasoning
+            except urllib.error.HTTPError as e:
+                err_body = e.read().decode("utf-8", errors="ignore")
+                print(f"[Translator] NexusLLM HTTP {e.code} (attempt {attempt}/3 at {base_url}): {err_body[:100]}")
+                if e.code in (502, 503, 504) and attempt < 3:
+                    time.sleep(3 * attempt)
+                    continue
+                break
+            except Exception as e:
+                print(f"[Translator] NexusLLM error (attempt {attempt}/3 at {base_url}): {e}")
+                if attempt < 3:
+                    time.sleep(2)
+                    continue
+                break
+
+    return None
 
 def call_gemini_api(prompt: str) -> Optional[str]:
     """Call Gemini API using google-genai SDK or direct REST API."""

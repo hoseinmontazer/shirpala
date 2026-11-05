@@ -62,7 +62,7 @@ def run_pipeline(limit: int = DAILY_MAX_POSTS, enable_tts: bool = TTS_ENABLED):
         # Step 4: Text-to-Speech (TTS) Audio Generation
         audio_url = None
         if enable_tts and is_approved:
-            print("[Step 4/5] Generating Audio Podcast version via Kokoro TTS...")
+            print("[Step 4/5] Generating Audio Podcast version via Piper TTS...")
             try:
                 audio_url = generate_post_audio(audited_post)
             except Exception as e:
