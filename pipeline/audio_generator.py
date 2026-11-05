@@ -18,82 +18,11 @@ from .config import (
     TTS_VOICE,
     AUDIO_OUTPUT_DIR
 )
-
-# Phonetic transliteration dictionary for Persian TTS
-# Piper and offline TTS engines stumble heavily on raw English characters.
-# Transliterating them into Persian script makes speech 100% natural, fluent, and clear.
-PERSIAN_PHONETIC_REPLACEMENTS = [
-    (r'\bKubernetes\b|\bk8s\b', 'کوبرنتیز'),
-    (r'\bDocker\b', 'داکر'),
-    (r'\bDeployments\b', 'دیپلوی‌منت‌ها'),
-    (r'\bDeployment\b', 'دیپلوی‌منت'),
-    (r'\bStatefulSets\b', 'استیت‌فول‌ست‌ها'),
-    (r'\bStatefulSet\b', 'استیت‌فول‌ست'),
-    (r'\bDaemonSets\b', 'دیمن‌ست‌ها'),
-    (r'\bDaemonSet\b', 'دیمن‌ست'),
-    (r'\bJobSets\b', 'جاب‌ست‌ها'),
-    (r'\bJobSet\b', 'جاب‌ست'),
-    (r'\beBPF\b', 'ای‌بی‌پی‌اف'),
-    (r'\bLinux\b', 'لینوکس'),
-    (r'\bKernel\b', 'کرنل'),
-    (r'\bSREs\b|\bSRE\b', 'اس‌آر‌ای'),
-    (r'\bDevOps\b', 'دوآپس'),
-    (r'\bOOM\b', 'او‌او‌ام'),
-    (r'\bPods\b', 'پادها'),
-    (r'\bPod\b', 'پاد'),
-    (r'\bCI/CD\b', 'سی‌آی‌سی‌دی'),
-    (r'\bAPIs\b|\bAPI\b', 'ای‌پی‌آی'),
-    (r'\bCPU\b', 'سی‌پی‌یو'),
-    (r'\bRAM\b', 'رم'),
-    (r'\bSIG Apps\b', 'سیگ اپس'),
-    (r'\bSIG\b', 'سیگ'),
-    (r'\bCloudflare\b', 'کلودفلر'),
-    (r'\bGrafana\b', 'گرافانا'),
-    (r'\bPrometheus\b', 'پرومتئوس'),
-    (r'\bOpenTelemetry\b', 'اوپن‌تله‌متری'),
-    (r'\bCNCF\b', 'سی‌ان‌سی‌اف'),
-    (r'\bSandbox\b', 'سندباکس'),
-    (r'\bAgentic\b', 'ایجنتیک'),
-    (r'\bAgent\b', 'ایجنت'),
-    (r'\bAI\b', 'هوش مصنوعی'),
-    (r'\bv2\b', 'ورژن دو'),
-    (r'\bv1\b', 'ورژن یک'),
-    (r'\bcgroups?\b', 'سی‌گروپ‌ها'),
-    (r'\bKubelet\b', 'کیوبلت'),
-    (r'\bKubeadm\b', 'کیوب‌ادمین'),
-    (r'\bNamespaces\b', 'نیم‌اسپیس‌ها'),
-    (r'\bNamespace\b', 'نیم‌اسپیس'),
-    (r'\bIPAM\b', 'آی‌پی‌ام'),
-    (r'\bIP\b', 'آی‌پی'),
-]
+from .text_normalizer import normalize_mixed_persian_english_text
 
 def clean_persian_tts_script(text: str) -> str:
-    """Prepare Persian text for clean, human-sounding speech synthesis."""
-    if not text:
-        return ""
-
-    # 1. Apply phonetic term transliterations
-    for pattern, replacement in PERSIAN_PHONETIC_REPLACEMENTS:
-        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
-
-    # 2. Strip markdown headers, bold, italics, code blocks, links
-    text = re.sub(r'```[\s\S]*?```', '', text)
-    text = re.sub(r'`[^`]*`', '', text)
-    text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)
-    text = re.sub(r'https?://\S+', '', text)
-    text = re.sub(r'[#*_\(\)\[\]\{\}<>"\']', ' ', text)
-
-    # 3. Strip remaining standalone English words (Piper cannot pronounce raw English)
-    text = re.sub(r'\b[a-zA-Z]+\b', '', text)
-
-    # 4. Normalize punctuation for speech cadence (commas provide natural breathing pauses)
-    text = re.sub(r'[:؛]', '،', text)
-    text = re.sub(r'[ \t]+', ' ', text)
-    text = re.sub(r'\s*([،\.!?])\s*', r'\1 ', text)
-    text = re.sub(r'([،\.!?])\s*\1+', r'\1', text)
-    text = re.sub(r'\n+', ' ', text)
-
-    return text.strip()
+    """Prepare Persian text for clean, human-sounding speech synthesis using the dedicated normalizer."""
+    return normalize_mixed_persian_english_text(text, enable_llm_for_unknown=True)
 
 def clean_english_tts_script(text: str) -> str:
     """Prepare English text for clean speech synthesis."""
