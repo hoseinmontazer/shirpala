@@ -1,11 +1,25 @@
+import os
 import re
 import json
+from pathlib import Path
 from typing import Dict, List, Optional
-from .config import NEXUSLLM_API_KEY, NEXUSLLM_BASE_URL, NEXUSLLM_MODEL
+from .config import BASE_DIR, NEXUSLLM_API_KEY, NEXUSLLM_BASE_URL, NEXUSLLM_MODEL
 
-# Comprehensive Technical Dictionary: English -> Persian Phonetic
-# Ordered conceptually; will be compiled with longest matches first.
-TECHNICAL_DICTIONARY: Dict[str, str] = {
+# Persistent auto-learning cache path
+CACHE_DIR = BASE_DIR / "pipeline_data"
+CACHE_FILE = CACHE_DIR / "phonetic_cache.json"
+
+# Phonetic Persian sounds for English alphabet letters
+LETTER_SOUNDS: Dict[str, str] = {
+    "A": "ای", "B": "بی", "C": "سی", "D": "دی", "E": "ای", "F": "اف",
+    "G": "جی", "H": "اچ", "I": "آی", "J": "جی", "K": "کی", "L": "ال",
+    "M": "ام", "N": "ان", "O": "او", "P": "پی", "Q": "کیو", "R": "آر",
+    "S": "اس", "T": "تی", "U": "یو", "V": "وی", "W": "دبلیو", "X": "ایکس",
+    "Y": "وای", "Z": "زد"
+}
+
+# Core Seed Technical Dictionary: English -> Persian Phonetic
+BASE_TECHNICAL_DICTIONARY: Dict[str, str] = {
     # Organizations & Communities
     "Kubernetes": "کوبرنتیز",
     "k8s": "کوبرنتیز",
@@ -238,7 +252,7 @@ TECHNICAL_DICTIONARY: Dict[str, str] = {
     "GCP": "جی‌سی‌پی",
     "Azure": "آژور",
 
-    # Common Programming Languages
+    # Languages
     "Golang": "زبان گو",
     "Go": "گو",
     "Rust": "راست",
@@ -246,20 +260,44 @@ TECHNICAL_DICTIONARY: Dict[str, str] = {
     "Bash": "بش",
 }
 
-# Pre-compile sorted technical terms (longer terms first to prevent partial replacement)
-_SORTED_PATTERNS = sorted(TECHNICAL_DICTIONARY.keys(), key=len, reverse=True)
-_TECH_REGEX = re.compile(
-    r'\b(' + '|'.join(re.escape(k) for k in _SORTED_PATTERNS) + r')\b',
-    flags=re.IGNORECASE
-)
+# Runtime Dynamic Cache (Auto-Learning)
+DYNAMIC_CACHE: Dict[str, str] = {}
 
-def _replace_technical_term(match: re.Match) -> str:
-    word = match.group(0)
-    # Case-insensitive lookup in dictionary
-    for k, v in TECHNICAL_DICTIONARY.items():
-        if k.lower() == word.lower():
-            return v
-    return word
+def _load_persistent_cache():
+    """Load previously learned transliterations from disk."""
+    global DYNAMIC_CACHE
+    if CACHE_FILE.exists():
+        try:
+            with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                DYNAMIC_CACHE = json.load(f)
+        except Exception:
+            DYNAMIC_CACHE = {}
+
+def _save_persistent_cache():
+    """Save newly learned transliterations to disk for future runs."""
+    try:
+        CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(DYNAMIC_CACHE, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"[TextNormalizer] Cache save warning: {e}")
+
+# Load cache on module import
+_load_persistent_cache()
+
+def get_merged_dictionary() -> Dict[str, str]:
+    """Return base technical terms combined with auto-learned terms."""
+    merged = dict(BASE_TECHNICAL_DICTIONARY)
+    merged.update(DYNAMIC_CACHE)
+    return merged
+
+def phonetize_acronym(acronym: str) -> str:
+    """
+    Automatically phonetize any all-caps English acronym into Persian sounds.
+    e.g. HPA -> اچ‌پی‌ای, CSI -> سی‌اس‌آی, DRA -> دی‌آر‌ای, RBAC -> آر‌بی‌ای‌سی
+    """
+    parts = [LETTER_SOUNDS.get(ch, ch) for ch in acronym.upper()]
+    return "\u200c".join(parts)
 
 def normalize_numbers_versions_and_units(text: str) -> str:
     """Normalize versions, percentiles, percentages, and metrics to Persian words."""
@@ -281,7 +319,7 @@ def normalize_numbers_versions_and_units(text: str) -> str:
     # Percentages: 99.9% -> نود و نه و نه دهم درصد
     text = re.sub(r'(\d+(?:\.\d+)?)\s*%', r'\1 درصد', text)
 
-    # Units of measurement (ordered carefully)
+    # Units of measurement
     text = re.sub(r'(\d+)\s*(?:ms|millisec)\b', r'\1 میلی‌ثانیه', text, flags=re.IGNORECASE)
     text = re.sub(r'(\d+)\s*(?:sec|seconds?)\b', r'\1 ثانیه', text, flags=re.IGNORECASE)
     text = re.sub(r'(\d+)\s*(?:Gbps|gbps)\b', r'\1 گیگابیت بر ثانیه', text)
@@ -296,21 +334,33 @@ def normalize_numbers_versions_and_units(text: str) -> str:
     return text
 
 def _transliterate_unmapped_english_with_llm(words: List[str]) -> Dict[str, str]:
-    """Call LLM to get phonetic Persian transliteration for unknown English words."""
+    """Call LLM to get phonetic Persian transliteration for novel English words."""
     if not words or not NEXUSLLM_API_KEY:
         return {}
 
+    # Separate pure acronyms (all caps, 2-5 chars) which don't even need LLM
+    novel_words = []
+    acronym_results = {}
+    for w in words:
+        if w.isupper() and 2 <= len(w) <= 5:
+            acronym_results[w] = phonetize_acronym(w)
+        else:
+            novel_words.append(w)
+
+    if not novel_words:
+        return acronym_results
+
     prompt = (
-        "برای هر کدام از این اصطلاحات و کلمات انگلیسی، دقیقاً تلفظ و آوانگاری آن را به خط فارسی بنویس. "
+        "برای هر کدام از این اصطلاحات و کلمات انگلیسی حوزه فناوری، دقیقاً تلفظ و آوانگاری استاندارد آن را به خط فارسی بنویس. "
         "پاسخ را فقط به صورت یک آبجکت JSON معتبر بازگردان که کلیدها همان کلمات انگلیسی و مقادیر تلفظ فارسی باشند.\n\n"
-        f"کلمات: {', '.join(words[:25])}\n\n"
-        'مثال خروجی: {"Throttling": "تراتلینگ", "RateLimiting": "ریت لیمیتینگ"}'
+        f"کلمات: {', '.join(novel_words[:30])}\n\n"
+        'مثال خروجی: {"Karpenter": "کارپنتر", "vLLM": "وی اِل اِل اِم", "DeepSeek": "دیپ‌سیک"}'
     )
 
     payload = {
         "model": NEXUSLLM_MODEL,
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 500,
+        "max_tokens": 600,
         "temperature": 0.1,
         "chat_template_kwargs": {"enable_thinking": False}
     }
@@ -326,31 +376,48 @@ def _transliterate_unmapped_english_with_llm(words: List[str]) -> Dict[str, str]
         }
     )
 
+    results = dict(acronym_results)
     try:
         with opener.open(req, timeout=15) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             content = data["choices"][0]["message"].get("content", "").strip()
-            # Clean markdown JSON fences
             content = re.sub(r'^```(?:json)?\s*', '', content)
             content = re.sub(r'```$', '', content).strip()
             match = re.search(r'\{[\s\S]*\}', content)
             if match:
-                return json.loads(match.group(0))
+                llm_dict = json.loads(match.group(0))
+                results.update(llm_dict)
     except Exception as e:
         print(f"[TextNormalizer] LLM transliteration warning: {e}")
 
-    return {}
+    # Auto-learn: persist any new learned words into DYNAMIC_CACHE
+    if results:
+        updated = False
+        for k, v in results.items():
+            if k not in DYNAMIC_CACHE and v and len(v) > 1:
+                DYNAMIC_CACHE[k] = v
+                updated = True
+        if updated:
+            _save_persistent_cache()
+            print(f"[TextNormalizer] Auto-learned and cached {len(results)} new technical terms permanently.")
+
+    return results
 
 def normalize_mixed_persian_english_text(
     text: str,
-    enable_llm_for_unknown: bool = True
+    enable_auto_learning: bool = True,
+    enable_llm_for_unknown: Optional[bool] = None
 ) -> str:
     """
-    Primary Normalization Pipeline for Persian Text-to-Speech (TTS).
+    Self-Learning Normalization Pipeline for Persian Text-to-Speech (TTS).
     
     Transforms mixed English and Persian text into pure, fluent, natural
-    Persian phonetic script suitable for Piper and Neural speech synthesizers.
+    Persian phonetic script. Auto-detects unknown English words and queries LLM
+    once, caching them permanently so no manual dictionary maintenance is needed.
     """
+    if enable_llm_for_unknown is not None:
+        enable_auto_learning = enable_llm_for_unknown
+
     if not text:
         return ""
 
@@ -362,20 +429,43 @@ def normalize_mixed_persian_english_text(
     text = re.sub(r'<[^>]+>', '', text)
     text = re.sub(r'[#*_\(\)\[\]\{\}<>"\']', ' ', text)
 
-    # Step 2: Replace Known Technical Vocabulary via Regex Dictionary
-    text = _TECH_REGEX.sub(_replace_technical_term, text)
+    # Step 2: Replace Known Technical Vocabulary (Base + Learned Cache)
+    active_dict = get_merged_dictionary()
+    sorted_keys = sorted(active_dict.keys(), key=len, reverse=True)
+    if sorted_keys:
+        pattern = re.compile(r'\b(' + '|'.join(re.escape(k) for k in sorted_keys) + r')\b', flags=re.IGNORECASE)
+        def _repl(m: re.Match):
+            word = m.group(0)
+            for k, v in active_dict.items():
+                if k.lower() == word.lower():
+                    return v
+            return word
+        text = pattern.sub(_repl, text)
 
     # Step 3: Normalize Numbers, Versions, and Units
     text = normalize_numbers_versions_and_units(text)
 
-    # Step 4: Handle Unmapped English Words
+    # Step 4: Auto-detect Any Remaining English Words & Acronyms
     remaining_english = list(set(re.findall(r'\b[a-zA-Z]{2,}\b', text)))
     if remaining_english:
-        if enable_llm_for_unknown and len(remaining_english) <= 20:
-            llm_replacements = _transliterate_unmapped_english_with_llm(remaining_english)
-            for en_word, fa_pron in llm_replacements.items():
-                pattern = r'\b' + re.escape(en_word) + r'\b'
-                text = re.sub(pattern, fa_pron, text, flags=re.IGNORECASE)
+        # Check against active_dict again (case-insensitive)
+        unmapped = [
+            w for w in remaining_english
+            if not any(k.lower() == w.lower() for k in active_dict)
+        ]
+
+        if unmapped and enable_auto_learning:
+            learned_dict = _transliterate_unmapped_english_with_llm(unmapped)
+            for en_word, fa_pron in learned_dict.items():
+                w_pat = r'\b' + re.escape(en_word) + r'\b'
+                text = re.sub(w_pat, fa_pron, text, flags=re.IGNORECASE)
+
+        # Fallback for pure all-caps acronyms that weren't caught
+        text = re.sub(
+            r'\b[A-Z]{2,5}\b',
+            lambda m: phonetize_acronym(m.group(0)),
+            text
+        )
 
         # Remove any lingering standalone English letters to avoid TTS glitches
         text = re.sub(r'\b[a-zA-Z]+\b', '', text)

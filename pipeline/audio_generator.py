@@ -21,8 +21,8 @@ from .config import (
 from .text_normalizer import normalize_mixed_persian_english_text
 
 def clean_persian_tts_script(text: str) -> str:
-    """Prepare Persian text for clean, human-sounding speech synthesis using the dedicated normalizer."""
-    return normalize_mixed_persian_english_text(text, enable_llm_for_unknown=True)
+    """Prepare Persian text for clean, human-sounding speech synthesis using the auto-learning normalizer."""
+    return normalize_mixed_persian_english_text(text, enable_auto_learning=True)
 
 def clean_english_tts_script(text: str) -> str:
     """Prepare English text for clean speech synthesis."""
