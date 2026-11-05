@@ -12,6 +12,16 @@ from .config import (
 )
 from .db import record_audit_result
 
+def _toml_multiline_string(value: str) -> str:
+    """Encode a long narration script as a TOML multiline literal string."""
+    text = (value or "").strip()
+    if not text:
+        return ""
+    # Avoid breaking the delimiter if the model ever emits triple quotes.
+    safe = text.replace('"""', "'''")
+    return f'"""\n{safe}\n"""'
+
+
 def format_hugo_post(
     post_data: Dict[str, Any],
     is_approved: bool,
@@ -40,6 +50,13 @@ def format_hugo_post(
     trans_key_line = f'translationKey = "{translation_key}"\n' if translation_key else ""
     audio_frontmatter = f'audio = ["{audio_url}"]\n' if audio_url else ""
 
+    # Persist spoken narration so TTS regen does not fall back to mixed article body.
+    audio_script_raw = post_data.get("audio_script", "")
+    audio_script_block = ""
+    encoded_script = _toml_multiline_string(audio_script_raw)
+    if encoded_script:
+        audio_script_block = f"audio_script = {encoded_script}\n"
+
     toml_frontmatter = f"""+++
 title = "{title}"
 date = {date_str}
@@ -49,7 +66,7 @@ tags = [{tags_formatted}]
 categories = [{categories_formatted}]
 author = "{author}"
 link = "{link}"
-{trans_key_line}{audio_frontmatter}audit_score = {audit_score}
+{trans_key_line}{audio_frontmatter}{audio_script_block}audit_score = {audit_score}
 +++
 {post_data.get("content_markdown", "").strip()}
 """

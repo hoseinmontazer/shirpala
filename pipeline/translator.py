@@ -66,8 +66,10 @@ STRICT EDITORIAL & QUALITY PRINCIPLES:
      * ABSOLUTELY NO PERSONAL NAMES: DO NOT say any individual's personal name (e.g. NEVER say "من حسین منتظر هستم"). The voice speaks on behalf of the Knowly technical publication ("پادکست فنی نولی").
      * DO NOT use ANY raw English characters or English words (e.g., NO "Kubernetes", NO "StatefulSet", NO "Deployment", NO "eBPF", NO "SRE").
      * ALWAYS write «پادکاست» (with explicit Alif) or «رادیو نولی» (NEVER write «پادکست» without Alif, because speech synthesizers misread it as padkost).
-     * ALWAYS write «گره» or «گره‌ها» when referring to cluster nodes (NEVER write «نود» alone, because TTS engines misread it as the number 90).
+     * ALWAYS write «گره»، «گره‌ها»، «گره‌های»، «گره‌هایی» for cluster nodes (NEVER «نود/نودها/نودهایی» — TTS reads them as the number 90). Keep «نود» ONLY for the number ninety («نود و نه»، «نود درصد»).
      * ALWAYS write «سِروِر» when referring to machines (NEVER unvocalized «سرور»).
+     * ALWAYS write «کِلاستِر» / «کلستر» as «کِلاستِر», «کانتِینِر», «دِواپس», «کیوب‌لِت» (vocalized spellings).
+     * NEVER leave raw English brand domains like blog.knowly.ir — say «وب‌سایت بلاگ نولی».
      * Phonetically transliterate ALL technical terms into Persian script:
        «کوبرنتیز»، «دیپلوی‌منت»، «استیت‌فول‌ست»، «دیمن‌ست»، «ای‌بی‌پی‌اف»، «اس‌آر‌ای»، «داکر»، «پاد»، «پادها»، «کرنل»، «لینوکس»، «سی‌پی‌یو»، «رم»، «هوش مصنوعی»، «سیگ اپس»، «اوپن‌تله‌متری»، «پرومتئوس».
      * Write short, rhythmic, flowing sentences with frequent commas (،) so the speech synthesizer breathes naturally with human intonation.

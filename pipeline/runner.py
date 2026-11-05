@@ -63,7 +63,7 @@ def run_pipeline(limit: int = DAILY_MAX_POSTS, enable_tts: bool = TTS_ENABLED):
         # Step 4: Text-to-Speech (TTS) Audio Generation
         audio_urls = {}
         if enable_tts and is_approved:
-            print("[Step 4/5] Generating Audio Podcast versions (Nexus Piper FA + EN)...")
+            print("[Step 4/5] Generating Audio Podcast versions (Nexus fish-speech/piper FA + EN)...")
             slug = audited_post.get("slug", "post")
 
             if "fa" in audited_post:

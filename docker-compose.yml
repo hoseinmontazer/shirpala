@@ -43,8 +43,11 @@ services:
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.8-flash}
       - LLM_PROVIDER=${LLM_PROVIDER:-nexusllm}
       - TTS_ENABLED=${TTS_ENABLED:-true}
-      - TTS_MODEL=${TTS_MODEL:-piper}
-      - TTS_VOICE=${TTS_VOICE:-fa_IR-amir-medium}
+      - TTS_PROVIDER=${TTS_PROVIDER:-nexus}
+      - TTS_MODEL=${TTS_MODEL:-fish-speech}
+      - TTS_FALLBACK_MODEL=${TTS_FALLBACK_MODEL:-piper}
+      - TTS_VOICE=${TTS_VOICE:-default}
+      - TTS_VOICE_PIPER=${TTS_VOICE_PIPER:-fa_IR-amir-medium}
       - WHISPER_MODEL=${WHISPER_MODEL:-whisper-large-v3}
       - SCHEDULE_TIME=${SCHEDULE_TIME:-07:00}
       - DAILY_MAX_POSTS=${DAILY_MAX_POSTS:-3}
@@ -53,6 +56,7 @@ services:
       - POSTS_EN_DIR=/app/blog/content/en/posts
       - POSTS_OUTPUT_DIR=/app/blog/content/fa/posts
       - AUDIO_OUTPUT_DIR=/app/blog/static/audio/posts
+      - PIPELINE_DATA_DIR=/app/data
       - DB_PATH=/app/data/pipeline.db
       - SOURCES_FILE=/app/pipeline/sources.yaml
       - HUGO_REBUILD_ON_PUBLISH=false

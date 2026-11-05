@@ -312,18 +312,119 @@ body.colorscheme-dark .post-audio-card,
     let isSpeaking = false;
     let isPaused = false;
     let ttsRate = 1.0;
+    let utteranceQueue = [];
+    let activeUtterance = null;
+
+    // Browser voices routinely misread mixed FA/EN tech prose. Normalize before speak.
+    const FA_TECH_LEXICON = [
+      [/Kubernetes/gi, 'کوبرنتیز'], [/k8s/gi, 'کوبرنتیز'],
+      [/StatefulSets?/gi, 'استیت‌فول‌ست'], [/DaemonSets?/gi, 'دیمن‌ست'],
+      [/ReplicaSets?/gi, 'رپلیکا‌ست'], [/Deployments?/gi, 'دیپلوی‌منت'],
+      [/CronJobs?/gi, 'کران‌جاب'], [/JobSets?/gi, 'جاب‌ست'],
+      [/Namespaces?/gi, 'نیم‌اسپیس'], [/ConfigMaps?/gi, 'کانفیگ‌مپ'],
+      [/Secrets?/gi, 'سیکرت'], [/Pods?/gi, 'پاد'], [/Nodes?/gi, 'گره'],
+      [/Clusters?/gi, 'کِلاستِر'], [/Kubelet/gi, 'کیوب‌لِت'],
+      [/kubectl/gi, 'کیوب‌سی‌تی‌ال'], [/DevOps/gi, 'دِواپس'],
+      [/SREs?/gi, 'اس‌آر‌ای'], [/cgroups?/gi, 'سی‌گروپ'],
+      [/eBPF/gi, 'ای‌بی‌پی‌اف'], [/Prometheus/gi, 'پرومتئوس'],
+      [/OpenTelemetry/gi, 'اوپن‌تله‌متری'], [/Docker/gi, 'داکر'],
+      [/Linux/gi, 'لینوکس'], [/Python/gi, 'پایتون'],
+      [/GitHub/gi, 'گیت‌هاب'], [/GitLab/gi, 'گیت‌لب'],
+      [/Knowly/gi, 'نولی'], [/Bare-?metal/gi, 'بِیرمِتل'],
+      [/\bCPU\b/g, 'سی‌پی‌یو'], [/\bGPU\b/g, 'جی‌پی‌یو'],
+      [/\bRAM\b/g, 'رم'], [/\bAPI\b/g, 'ای‌پی‌آی'],
+      [/\bDNS\b/g, 'دی‌ان‌اس'], [/\bTLS\b/g, 'تی‌ال‌اس'],
+      [/\bHTTP\/?3?\b/gi, 'اچ‌تی‌تی‌پی'], [/\bYAML\b/gi, 'یمل'],
+      [/\bJSON\b/gi, 'جیسون'], [/\bOOM\b/g, 'او‌او‌ام'],
+      [/\bQoS\b/g, 'کیو‌او‌اس'], [/\bCI\/CD\b/gi, 'سی‌آی‌سی‌دی'],
+      [/\bv(\d+)\.(\d+)(?:\.(\d+))?/gi, ' ورژن $1 ممیز $2'],
+      [/\bv(\d+)\b/gi, ' ورژن $1'],
+      [/\bp99\b/gi, 'پی نود و نه'], [/\bp95\b/gi, 'پی نود و پنج']
+    ];
+
+    const FA_HOMOGRAPH_FIXES = [
+      [/پادکست/g, 'پادکاست'],
+      [/سرور/g, 'سِروِر'],
+      [/دوآپس|دواپس/g, 'دِواپس'],
+      [/کانتینر/g, 'کانتِینِر'],
+      [/کلاستر|کلستر/g, 'کِلاستِر'],
+      [/کیوبلت/g, 'کیوب‌لِت']
+    ];
+
+    function normalizeFaForSpeech(raw) {
+      let text = raw;
+      // Drop Latin left inside parentheses after Persian explanation: «ایزوله‌سازی (Isolation)»
+      text = text.replace(/(\S)\s*\(([A-Za-z][^)]*)\)/g, '$1');
+      FA_TECH_LEXICON.forEach(function(pair) {
+        text = text.replace(pair[0], pair[1]);
+      });
+      // Protect number-ninety phrases, then rewrite cluster-node «نود…» → «گره…»
+      const ninetySlots = [];
+      text = text.replace(
+        /پی\s+نود(?:\s+و\s+(?:یک|دو|سه|چهار|پنج|شش|هفت|هشت|نه))?|نود\s+و\s+(?:یک|دو|سه|چهار|پنج|شش|هفت|هشت|نه)|نود\s+درصد|نود\s+ممیز|نود\s+تا/g,
+        function(m) {
+          ninetySlots.push(m);
+          return '٪٪NIN' + (ninetySlots.length - 1) + '٪٪';
+        }
+      );
+      text = text.replace(/نود(هایی|های|ها|ی|ای)?/g, function(_, suf) {
+        return 'گره' + (suf ? ('\u200c' + suf.replace(/^\u200c/, '')) : '');
+      });
+      ninetySlots.forEach(function(val, idx) {
+        text = text.replace('٪٪NIN' + idx + '٪٪', val);
+      });
+      FA_HOMOGRAPH_FIXES.forEach(function(pair) {
+        text = text.replace(pair[0], pair[1]);
+      });
+      text = text.replace(/https?:\/\/\S+/g, ' ');
+      text = text.replace(/\b[A-Za-z]{2,}\b/g, ' ');
+      text = text.replace(/\s{2,}/g, ' ').trim();
+      return text;
+    }
+
+    function pickVoice(utterLang) {
+      const voices = window.speechSynthesis.getVoices() || [];
+      if (!voices.length) return null;
+      const prefer = voices.find(function(v) {
+        return (v.lang || '').toLowerCase().indexOf(utterLang.toLowerCase()) === 0;
+      }) || voices.find(function(v) {
+        return (v.lang || '').toLowerCase().indexOf(utterLang.split('-')[0].toLowerCase()) === 0;
+      });
+      return prefer || null;
+    }
+
+    function splitSpeechChunks(text) {
+      const parts = text.split(/(?<=[.\u06D4!?\u061F،,;؛])\s+/);
+      const chunks = [];
+      let buf = '';
+      parts.forEach(function(part) {
+        if ((buf + ' ' + part).trim().length > 180) {
+          if (buf.trim()) chunks.push(buf.trim());
+          buf = part;
+        } else {
+          buf = (buf ? buf + ' ' : '') + part;
+        }
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+      return chunks.filter(function(c) { return c.length > 1; });
+    }
 
     function getArticleText() {
       const content = document.querySelector('.post-content');
       if (!content) return '';
-      // Clone and remove pre/code blocks so speech is smooth
       const clone = content.cloneNode(true);
-      clone.querySelectorAll('pre, code, script, style, .highlight').forEach(el => el.remove());
-      return clone.innerText.replace(/\s+/g, ' ').trim();
+      clone.querySelectorAll('pre, code, script, style, .highlight, table').forEach(function(el) {
+        el.remove();
+      });
+      let text = clone.innerText.replace(/\s+/g, ' ').trim();
+      if (isFa) text = normalizeFaForSpeech(text);
+      return text;
     }
 
     function stopTTS() {
       window.speechSynthesis.cancel();
+      utteranceQueue = [];
+      activeUtterance = null;
       isSpeaking = false;
       isPaused = false;
       ttsPlayIcon.className = 'fa-solid fa-play';
@@ -331,6 +432,37 @@ body.colorscheme-dark .post-audio-card,
       if (ttsStatus) {
         ttsStatus.textContent = isFa ? 'توقف خواندن' : 'Reading stopped';
       }
+    }
+
+    function speakNextChunk() {
+      if (!utteranceQueue.length) {
+        stopTTS();
+        if (ttsStatus) ttsStatus.textContent = isFa ? 'پایان روخوانی' : 'Finished reading';
+        return;
+      }
+      const chunk = utteranceQueue.shift();
+      const utter = new SpeechSynthesisUtterance(chunk);
+      const utterLang = isFa ? 'fa-IR' : 'en-US';
+      utter.lang = utterLang;
+      utter.rate = ttsRate;
+      const voice = pickVoice(utterLang);
+      if (voice) utter.voice = voice;
+      activeUtterance = utter;
+
+      utter.onstart = function() {
+        isSpeaking = true;
+        isPaused = false;
+        ttsPlayIcon.className = 'fa-solid fa-pause';
+        if (ttsStopBtn) ttsStopBtn.style.display = 'inline-flex';
+        if (ttsStatus) ttsStatus.textContent = isFa ? 'درحال خواندن مقاله...' : 'Reading article...';
+      };
+      utter.onend = function() {
+        speakNextChunk();
+      };
+      utter.onerror = function() {
+        speakNextChunk();
+      };
+      window.speechSynthesis.speak(utter);
     }
 
     ttsPlayBtn.addEventListener('click', function() {
@@ -354,28 +486,8 @@ body.colorscheme-dark .post-audio-card,
       if (!text) return;
 
       window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = isFa ? 'fa-IR' : 'en-US';
-      utter.rate = ttsRate;
-
-      utter.onstart = function() {
-        isSpeaking = true;
-        isPaused = false;
-        ttsPlayIcon.className = 'fa-solid fa-pause';
-        if (ttsStopBtn) ttsStopBtn.style.display = 'inline-flex';
-        if (ttsStatus) ttsStatus.textContent = isFa ? 'درحال خواندن مقاله...' : 'Reading article...';
-      };
-
-      utter.onend = function() {
-        stopTTS();
-        if (ttsStatus) ttsStatus.textContent = isFa ? 'پایان روخوانی' : 'Finished reading';
-      };
-
-      utter.onerror = function() {
-        stopTTS();
-      };
-
-      window.speechSynthesis.speak(utter);
+      utteranceQueue = splitSpeechChunks(text);
+      speakNextChunk();
     });
 
     if (ttsStopBtn) {
@@ -390,11 +502,15 @@ body.colorscheme-dark .post-audio-card,
         ttsRate = speeds[speedIdx];
         ttsSpeedBtn.textContent = ttsRate + 'x';
         if (isSpeaking) {
-          // Restart with new rate
           stopTTS();
           ttsPlayBtn.click();
         }
       });
+    }
+
+    // Chrome loads voices asynchronously
+    if (typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
+      window.speechSynthesis.onvoiceschanged = function() { pickVoice(isFa ? 'fa-IR' : 'en-US'); };
     }
   }
 })();

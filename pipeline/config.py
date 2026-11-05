@@ -32,12 +32,18 @@ elif GEMINI_API_KEY:
 else:
     LLM_PROVIDER = "mock"
 
-# Audio & TTS Configuration (Default: Studio Neural Voice via edge-tts, or Piper on Nexus)
+# Audio & TTS Configuration
+# Primary path on production: NexusLLM (/v1/audio/speech) with fish-speech or piper.
+# "edge" remains an optional studio Neural fallback (Farid/Dilara).
 TTS_ENABLED = os.getenv("TTS_ENABLED", "true").lower() in ("true", "1", "yes")
-TTS_PROVIDER = os.getenv("TTS_PROVIDER", "edge").lower()  # "edge" (Studio Neural) or "nexus" (Piper)
-TTS_MODEL = os.getenv("TTS_MODEL", "piper")
-TTS_VOICE = os.getenv("TTS_VOICE", "fa-IR-FaridNeural")
+TTS_PROVIDER = os.getenv("TTS_PROVIDER", "nexus").lower()  # "nexus" | "edge"
+# Prefer fish-speech when the Nexus host has it healthy; piper is the reliable FA fallback.
+TTS_MODEL = os.getenv("TTS_MODEL", "fish-speech")
+TTS_FALLBACK_MODEL = os.getenv("TTS_FALLBACK_MODEL", "piper")
+TTS_VOICE = os.getenv("TTS_VOICE", "default")  # fish-speech default; piper uses fa_IR-amir-medium
+TTS_VOICE_PIPER = os.getenv("TTS_VOICE_PIPER", "fa_IR-amir-medium")
 TTS_VOICE_EN = os.getenv("TTS_VOICE_EN", "en-US-AndrewMultilingualNeural")
+TTS_VOICE_EN_PIPER = os.getenv("TTS_VOICE_EN_PIPER", "en_US-lessac-medium")
 AUDIO_OUTPUT_DIR = Path(os.getenv("AUDIO_OUTPUT_DIR", str(BASE_DIR / "blog" / "static" / "audio" / "posts")))
 
 # Whisper STT Configuration
@@ -45,6 +51,8 @@ WHISPER_MODEL = os.getenv("WHISPER_MODEL", "whisper-large-v3")
 
 # Pipeline Configuration
 SOURCES_FILE = Path(os.getenv("SOURCES_FILE", str(PIPELINE_DIR / "sources.yaml")))
+# Local default: ./pipeline_data ; Docker should set PIPELINE_DATA_DIR=/app/data
+PIPELINE_DATA_DIR = Path(os.getenv("PIPELINE_DATA_DIR", str(BASE_DIR / "pipeline_data")))
 DB_PATH = Path(os.getenv("DB_PATH", str(BASE_DIR / "pipeline.db")))
 POSTS_FA_DIR = Path(os.getenv("POSTS_FA_DIR", str(BASE_DIR / "blog" / "content" / "fa" / "posts")))
 POSTS_EN_DIR = Path(os.getenv("POSTS_EN_DIR", str(BASE_DIR / "blog" / "content" / "en" / "posts")))
