@@ -54,5 +54,5 @@ HUGO_SITE_DIR = BASE_DIR / "blog"
 HUGO_REBUILD_ON_PUBLISH = os.getenv("HUGO_REBUILD_ON_PUBLISH", "true").lower() in ("true", "1", "yes")
 
 # Quality & Audit Rules
-MIN_BODY_WORD_COUNT = int(os.getenv("MIN_BODY_WORD_COUNT", "150"))
+MIN_BODY_WORD_COUNT = int(os.getenv("MIN_BODY_WORD_COUNT", "250"))
 AUTO_PUBLISH_APPROVED = os.getenv("AUTO_PUBLISH_APPROVED", "true").lower() in ("true", "1", "yes")

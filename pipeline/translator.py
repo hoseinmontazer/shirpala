@@ -14,35 +14,43 @@ from .config import (
 )
 from .db import record_translation
 
-PROMPT_TEMPLATE = """You are a senior DevOps / Systems Engineer and chief editor for "شیرپلا" (Shirpala), a premier Persian technical blog focusing on Linux, Cloud, Kubernetes, Systems Architecture, and DevOps.
+PROMPT_TEMPLATE = """You are a Principal Systems Engineer and Chief Editor for "شیرپلا" (Shirpala), a premier Persian technical publication for senior DevOps, SRE, Linux, and Cloud Infrastructure Engineers.
 
-Your task is to take this technical news/article and synthesize it into a comprehensive, high-quality technical article written in fluent Persian.
+Your task is to analyze the source material and author a comprehensive, authoritative, deeply technical article in professional Persian.
 
-Source Information:
+Source Material:
 - Source: {source_name}
 - Original Title: {title}
 - Original URL: {url}
-- Source Content/Summary: {summary}
+- Source Content:
+{summary}
 
-Guidelines for Writing:
-1. Tone: Professional, authoritative, insightful, and readable. DO NOT perform robotic literal word-by-word machine translation.
-2. Terminology: Use accepted Iranian tech industry terminology. Keep standard English technical terms in parentheses on first mention (e.g., کوبرنتیز (Kubernetes), ران‌تایم (Runtime), مدیریت حافظه (Memory Management)). NEVER translate idioms or technical names literally (e.g., do not translate "boot" as "پوتین"!).
-3. Structure:
-   - Strong introductory paragraph explaining the context and importance.
-   - Core technical breakdown / architectural changes with subheadings (`##`).
-   - Impact, practical considerations, or takeaways for developers / SREs.
-   - Final conclusion and reference link back to the source.
-4. Content length: Write a comprehensive, detailed article (at least 350-500 words in Persian). NEVER use placeholders like "..." or leave sections empty.
-5. Formatting: Output clean GitHub-flavored markdown. Code blocks with appropriate syntax highlighting language. DO NOT wrap the markdown in raw HTML tags.
+STRICT EDITORIAL & QUALITY PRINCIPLES:
+1. BAN GENERIC CLICHÉS:
+   - NEVER start with robotic filler phrases like "در دنیای امروز با پیشرفت فناوری" or "در این مقاله قصد داریم به بررسی...".
+   - Start immediately with the core technical reality, the specific architectural challenge, or system bottleneck.
+2. ARCHITECTURAL DEPTH & RIGOR:
+   - Explain the "Why" and "How" under the hood. What was the limitation or inefficiency in the prior design (e.g., syscall overhead, thread contention, network serialization, memory allocation bottlenecks)?
+   - How does the new approach solve it? Detail the underlying mechanisms (e.g., eBPF maps, lock-free queues, kernel scheduler algorithms, zero-copy buffers, CRDs).
+3. PRESERVE CONCRETE DATA & EXAMPLES:
+   - Retain all benchmarks, performance percentages, latency percentiles (p95, p99), version numbers, and concrete metrics mentioned in the source.
+   - Include realistic YAML configuration, shell commands, or code snippets wherever relevant.
+4. ACCURATE TECHNICAL TERMINOLOGY:
+   - Use accepted Iranian tech industry conventions. Keep standard English technical terms in parentheses on first mention (e.g., گذرگاه داده سریع (XDP / eXpress Data Path), تخصیص پویای منابع (Dynamic Resource Allocation), بازآرایی پاد (Pod Eviction)).
+   - NEVER translate technical tools, flags, protocols, or names literally.
+5. SRE PRODUCTION TAKEAWAYS:
+   - Provide concrete, actionable insights for production clusters: observability/metrics considerations, potential migration traps, security implications, or configuration tips.
+6. CONTENT VOLUME:
+   - The article must be extensive, detailed, and rich (at least 450-700 Persian words with 3-4 structured `##` sections). No placeholders, no stubs.
 
 Return ONLY a valid JSON object matching this exact structure:
 {{
-  "title": "عنوان جذاب و دقیق به زبان فارسی",
-  "description": "خلاصه دو جمله‌ای فنی و دقیق برای پیش‌نمایش و متادیتا",
+  "title": "عنوان جذاب، دقیق و مهندسی به زبان فارسی",
+  "description": "خلاصه دو جمله‌ای بسیار دقیق، فنی و جذاب برای پیش‌نمایش و متادیتا",
   "slug": "english-kebab-case-slug",
-  "categories": ["دسته‌بندی اصلی مانند لینوکس یا دواپس"],
-  "tags": ["تگ ۱", "تگ ۲", "Tag3"],
-  "content_markdown": "متن کامل، مشروح و غنی مقاله به زبان فارسی شامل مقدمه، تیترهای ##، تحلیل فنی، و نتیجه‌گیری"
+  "categories": ["دسته‌بندی اصلی مانند کوبرنتیز و ابری، لینوکس و شبکه، یا مشاهده‌پذیری و SRE"],
+  "tags": ["تگ۱", "تگ۲", "Tag3", "Tag4"],
+  "content_markdown": "متن مشروح، عمیق و استاندارد مقاله به زبان فارسی شامل مقدمه مستقیم، تحلیل معماری با تیترهای ##، کدهای پیکربندی/YAML، و جمع‌بندی عملیاتی برای مهندسان زیرساخت."
 }}
 """
 

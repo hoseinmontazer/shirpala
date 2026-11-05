@@ -1,42 +1,54 @@
 sources:
-  - name: "Linux Weekly News (LWN)"
-    url: "https://lwn.net/headlines/rss"
-    category: "Linux & Kernel"
-    enabled: true
-    default_tags: ["Linux", "Kernel", "OpenSource"]
-
   - name: "Kubernetes Official Blog"
     url: "https://kubernetes.io/feed.xml"
-    category: "DevOps & Cloud"
+    category: "کوبرنتیز و ابری"
     enabled: true
     default_tags: ["Kubernetes", "CloudNative", "DevOps"]
 
-  - name: "Microsoft DevOps Blog"
-    url: "https://devblogs.microsoft.com/devops/feed/"
-    category: "DevOps & CI/CD"
+  - name: "Cloudflare Engineering Blog"
+    url: "https://blog.cloudflare.com/rss/"
+    category: "لینوکس و شبکه"
     enabled: true
-    default_tags: ["DevOps", "CICD", "Cloud"]
+    default_tags: ["Linux", "Networking", "eBPF", "Edge"]
 
-  - name: "CNCF Blog"
-    url: "https://www.cncf.io/feed/"
-    category: "Cloud Native"
+  - name: "Grafana Labs Engineering Blog"
+    url: "https://grafana.com/blog/index.xml"
+    category: "مشاهده‌پذیری و SRE"
     enabled: true
-    default_tags: ["CloudNative", "Kubernetes", "Architecture"]
+    default_tags: ["Observability", "Prometheus", "OpenTelemetry", "SRE"]
+
+  - name: "CNCF Official Blog"
+    url: "https://www.cncf.io/feed/"
+    category: "کلود نیتیو"
+    enabled: true
+    default_tags: ["CNCF", "CloudNative", "Kubernetes"]
+
+  - name: "Netflix TechBlog"
+    url: "https://netflixtechblog.com/feed"
+    category: "معماری توزیع‌شده"
+    enabled: true
+    default_tags: ["Architecture", "DistributedSystems", "Microservices"]
 
   - name: "Docker Blog"
     url: "https://www.docker.com/blog/feed/"
-    category: "Containers"
+    category: "کانتینرها"
     enabled: true
     default_tags: ["Docker", "Containers", "DevOps"]
 
+  - name: "Julia Evans (Linux & Systems)"
+    url: "https://jvns.ca/atom.xml"
+    category: "لینوکس و سیستم"
+    enabled: true
+    default_tags: ["Linux", "Networking", "Debugging"]
+
   - name: "Go Dev Blog"
     url: "https://go.dev/blog/feed.atom"
-    category: "Backend & Systems"
+    category: "بک‌اند و زبان گو"
     enabled: true
     default_tags: ["Golang", "Backend", "Performance"]
 
   - name: "Rust Blog"
     url: "https://blog.rust-lang.org/feed.xml"
-    category: "Systems Programming"
+    category: "سیستم و زبان راست"
     enabled: true
     default_tags: ["Rust", "Systems", "Security"]

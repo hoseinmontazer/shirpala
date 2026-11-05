@@ -116,6 +116,18 @@ def audit_and_clean_post(
             score -= 25
             notes.append(f"WARNING: Body is too short ({len(words)} words; min required is {MIN_BODY_WORD_COUNT}).")
 
+        # Check for generic cliches
+        cliche_patterns = [
+            r'امروزه با پیشرفت (فناوری|تکنولوژی)',
+            r'در دنیای پرشتاب امروز',
+            r'در این مقاله قصد داریم',
+            r'به بررسی یکی از آخرین تحولات مطرح شده',
+        ]
+        for pat in cliche_patterns:
+            if re.search(pat, body):
+                score -= 15
+                notes.append(f"WARNING: Body contains generic cliché phrase matching '{pat}'.")
+
         # Code block balance check
         code_fence_count = body.count("```")
         if code_fence_count % 2 != 0:
